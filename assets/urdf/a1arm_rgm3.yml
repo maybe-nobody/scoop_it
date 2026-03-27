@@ -1,0 +1,106 @@
+robot_cfg:
+  kinematics:
+    use_usd_kinematics: False
+    isaac_usd_path: ""
+    usd_path: ""
+    usd_robot_root: ""
+    usd_flip_joints: []
+    usd_flip_joints: {}
+    usd_flip_joint_limits: []
+    urdf_path: "/home/lsq/catch_it/assets/urdf/a1arm_rgm3.xml"
+    asset_root_path: ""
+    base_link: "root_link1"
+    ee_link: "arm_seg6"
+    collision_link_names:
+      [
+        "arm_base",
+        "arm_seg1",
+        "arm_seg2",
+        "arm_seg3",
+        "arm_seg4",
+        "arm_seg5",
+        "arm_seg6",
+        "gripper1",
+        "gripper2",
+        "wrist_camera_connector",
+        "wrist_camera",
+        "rear_top_camera_connector",
+        "rear_top_camera",
+        "rgm3_base_link",
+        "rgm3_tires_link",
+        "aluminum_profiles"
+      ]
+    collision_spheres: "/home/lsq/catch_it/assets/urdf/a1arm_rgm3_sphere_database.yaml"
+    collision_sphere_buffer: 0.002 #0.02
+    extra_collision_spheres: {}
+    use_global_cumul: True
+    self_collision_ignore:
+      {
+        "arm_base": ["arm_seg1", "arm_seg2", "arm_seg3"],
+        "arm_seg1": ["arm_seg2", "arm_seg3", "arm_seg4"],
+        "arm_seg2": ["arm_seg3", "arm_seg4", "arm_seg5"],
+        "arm_seg3": ["arm_seg4", "arm_seg5", "arm_seg6", "gripper1", "gripper2", "wrist_camera_connector", "wrist_camera"],
+        "arm_seg4": ["arm_seg5", "arm_seg6", "gripper1", "gripper2", "wrist_camera_connector", "wrist_camera"],
+        "arm_seg5": ["arm_seg6", "gripper1", "gripper2", "wrist_camera_connector", "wrist_camera"],
+        "arm_seg6": ["gripper1", "gripper2", "wrist_camera_connector", "wrist_camera"],
+        "gripper1": ["gripper2", "wrist_camera_connector", "wrist_camera"],
+        "gripper2": ["wrist_camera_connector", "wrist_camera"],
+        "wrist_camera_connector": ["wrist_camera"],
+        "wrist_camera": [],
+        "rear_top_camera_connector": ["arm_base", "arm_seg1", "arm_seg2", "arm_seg3", "arm_seg4", "arm_seg5", "arm_seg6", "gripper1", "gripper2", "wrist_camera_connector", "wrist_camera", "rear_top_camera", "rgm3_base_link", "aluminum_profiles"],
+        "rear_top_camera": ["arm_base", "arm_seg1", "arm_seg2", "arm_seg3", "arm_seg4", "arm_seg5", "arm_seg6", "gripper1", "gripper2", "wrist_camera_connector", "wrist_camera", "rgm3_base_link", "aluminum_profiles"],        
+        "rgm3_base_link": ["arm_base", "arm_seg1", "arm_seg2", "aluminum_profiles"],
+        "rgm3_tires_link": ["arm_base", "arm_seg1", "arm_seg2", "arm_seg3", "arm_seg4", "arm_seg5", "arm_seg6", "gripper1", "gripper2", "wrist_camera_connector", "wrist_camera", "rear_top_camera_connector", "rear_top_camera", "rgm3_base_link", "aluminum_profiles"],
+        "aluminum_profiles": ["arm_base", "arm_seg1", "arm_seg2"],        
+      }
+    
+    self_collision_buffer:
+      {
+        "arm_base": 0.0,
+        "arm_seg1": 0.0,
+        "arm_seg2": 0.0,
+        "arm_seg3": 0.05,
+        "arm_seg4": 0.05,
+        "arm_seg5": 0.05,
+        "arm_seg6": 0.05,
+        "gripper1": 0.01,
+        "gripper2": 0.01,
+        "wrist_camera_connector": 0.05,
+        "wrist_camera": 0.05,
+        "rear_top_camera_connector": 0.1,
+        "rear_top_camera": 0.1,
+        "rgm3_base_link": 0.05,
+        "rgm3_tires_link": 0.0,
+        "aluminum_profiles": 0.0
+      }
+
+    mesh_link_names:
+      [
+        "arm_base",
+        "arm_seg1",
+        "arm_seg2",
+        "arm_seg3",
+        "arm_seg4",
+        "arm_seg5",
+        "arm_seg6",
+        "gripper1",
+        "gripper2",
+        "wrist_camera_connector",
+        "wrist_camera",
+        "rear_top_camera_connector",
+        "rear_top_camera",
+        "rgm3_base_link",
+        "rgm3_tires_link",
+        "aluminum_profiles"
+      ]
+    lock_joints: {"gripper1_axis": 0.03}
+    extra_links: {}
+    cspace:
+      joint_names: [
+        "root_x_axis_joint","root_y_axis_joint","root_z_rotation_joint","arm_joint1","arm_joint2",
+        "arm_joint3","arm_joint4","arm_joint5","arm_joint6","gripper1_axis"]
+      retract_config: [0.0, 0.0, 0.0, 0.0, 0.52, -0.52, 0.0, 0.0, 0.0, 0.03]
+      null_space_weight: [1,1,1,1,1,1,1,1,1,1]
+      cspace_distance_weight: [1,1,1,1,1,1,1,1,1,1]
+      max_acceleration: 15.0 #15.0
+      max_jerk: 500.0

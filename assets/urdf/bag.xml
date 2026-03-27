@@ -1,0 +1,27 @@
+
+<mujoco model="bag_net">
+    <option timestep="0.002" gravity="0 0 -9.81"/>
+
+    <worldbody>
+        <light directional="true" pos="0 0 3" dir="0 0 -1"/>
+        <!-- 添加一束光，类阳光，从坐标003向下（由dir表示）照射 -->
+        <geom name="floor" type="plane" size="0 0 .05" rgba=".5 .5 .5 1"/>
+        <!-- 创建一个无限大的地面。type="plane" 是平面，rgba 设置颜色为灰色（最后一位 1 是不透明度）。 -->
+        <body name="net_anchor" pos="0 0 1.0"> 
+            <composite type="grid" count="10 10 1" spacing="0.05">
+            <!-- type决定是绳子是平面还是球体,grid是网格点阵的意思,这里也可以用cloth -->
+                <pin coord="0 0"/>
+                <pin coord="0 9"/>
+                <pin coord="9 0"/>
+                <pin coord="9 9"/>
+                <!-- 上面是把四个角的球全都固定到初始位置 -->
+                <geom type="sphere" size="0.01" rgba=".8 .2 .2 1"/>
+                <!-- 决定每个点是什么形状,什么大小,什么颜色的 -->
+            </composite>
+        </body>
+        <body name="ball" pos="0.1 0.1 1.5">
+            <joint type="free"/>
+            <geom type="sphere" size="0.1" rgba="1 0 0 1" mass="0.5"/>
+        </body>
+    </worldbody>
+</mujoco>

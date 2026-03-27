@@ -1,0 +1,732 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- =================================================================================== -->
+<!--  本文件由 SolidWorks URDF 导出器自动生成！原始作者：Stephen Brawner (brawner@gmail.com)  -->
+<!--  提交版本：1.6.0-4-g7f85cfe   构建版本：1.6.7995.38578                              -->
+<!--  更多信息请参见 http://wiki.ros.org/sw_urdf_exporter                                -->
+<!-- =================================================================================== -->
+<robot name="a1arm_rgm3">
+
+  <!-- ========== 底盘 ========================= -->
+  <link name="rgm3_base_link">
+    <inertial>
+      <origin xyz="-0.0082031 0.00042253 0.23269" rpy="0 0 0"/>
+      <mass value="40.211"/>
+      <inertia ixx="0.6072" ixy="-2.1379E-08" ixz="0.00023532" iyy="0.34693" iyz="3.3698E-05" izz="0.7893"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/rgm3_base_link.STL"/>
+      </geometry>
+      <material name="mat_base">
+        <color rgba="0.32 0.32 0.34 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/rgm3_base_link.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="rgm3_tires_link">
+    <inertial>
+      <origin xyz="-0.001 -0.00040257 0.099826" rpy="0 0 0"/>
+      <mass value="8.9238"/>
+      <inertia ixx="0.024422" ixy="7.9007E-11" ixz="-6.351E-11" iyy="0.04014" iyz="-1.1975E-09" izz="0.024422"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/rgm3_tires_link.STL"/>
+      </geometry>
+      <material name="mat_tires">
+        <color rgba="0.102 0.098 0.082 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/rgm3_tires_link.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="rgm3_tires_link_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="rgm3_base_link"/>
+    <child  link="rgm3_tires_link"/>
+    <axis   xyz="0 0 0"/>
+  </joint>
+
+  <link name="aluminum_profiles">
+    <inertial>
+      <origin xyz="-0.18978 0.00011717 0.6976" rpy="0 0 0"/>
+      <mass value="3.259"/>
+      <inertia ixx="0.14298" ixy="-1.0051E-15" ixz="4.3492E-06" iyy="0.13285" iyz="8.1427E-18" izz="0.011877"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/aluminum_profiles.STL"/>
+      </geometry>
+      <material name="mat_alu">
+        <color rgba="0.93 0.92 0.93 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/aluminum_profiles.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="aluminum_profiles_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="rgm3_base_link"/>
+    <child  link="aluminum_profiles"/>
+    <axis   xyz="0 0 0"/>
+  </joint>
+
+  <!-- ========== 相机 ========================= -->
+  <link name="rear_top_camera_connector">
+    <inertial>
+      <origin xyz="-0.0031079 9.4369E-16 -0.007179" rpy="0 0 0"/>
+      <mass value="0.032864"/>
+      <inertia ixx="1.8537E-05" ixy="-2.0177E-20" ixz="-8.2683E-06" iyy="2.1469E-05" iyz="-6.0917E-21" izz="2.2804E-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/rear_top_camera_connector.STL"/>
+      </geometry>
+      <material name="mat_rear_conn">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/rear_top_camera_connector.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="rear_top_camera_connector_joint" type="fixed">
+    <origin xyz="-0.3025 0 1.4747" rpy="0 0 0"/>
+    <parent link="aluminum_profiles"/>
+    <child  link="rear_top_camera_connector"/>
+    <axis   xyz="0 0 0"/>
+  </joint>
+
+  <link name="rear_top_camera">
+    <inertial>
+      <origin xyz="-0.030921 3.2321E-06 -0.015277" rpy="0 0 0"/>
+      <mass value="0.039073"/>
+      <inertia ixx="2.1226E-06" ixy="-7.866E-09" ixz="4.368E-08" iyy="2.227E-05" iyz="-1.307E-08" izz="2.3588E-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/rear_top_camera.STL"/>
+      </geometry>
+      <material name="mat_rear_cam">
+        <color rgba="0.83 0.82 0.82 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/rear_top_camera.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="rear_top_camera_joint" type="fixed">
+    <origin xyz="0.053263 0.0325 0.001557" rpy="2.0071 0 1.5708"/>
+    <parent link="rear_top_camera_connector"/>
+    <child  link="rear_top_camera"/>
+    <axis   xyz="0 0 0"/>
+  </joint>
+
+  <!-- 前相机 -->
+  <link name="front_camera_connector">
+    <inertial>
+      <origin xyz="-0.0325 -0.0335899445994589 -0.0436598865929247" rpy="0 0 0"/>
+      <mass value="0.031502416790508"/>
+      <inertia ixx="3.12737379123699E-05" ixy="-3.35522115671672E-20" ixz="-1.38052047090796E-20" iyy="1.62022896584875E-05" iyz="-1.08479760083509E-05" izz="3.80598990127701E-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/front_camera_connector.STL"/>
+      </geometry>
+      <material name="mat_front_conn">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/front_camera_connector.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="front_camera_connector_joint" type="fixed">
+    <origin xyz="0.270334455349016 0.0324999999999669 0.499693823435788" rpy="1.13446401379631 0 1.5707963267948"/>
+    <parent link="aluminum_profiles"/>
+    <child  link="front_camera_connector"/>
+    <axis   xyz="0 0 0"/>
+  </joint>
+
+  <link name="front_camera">
+    <inertial>
+      <origin xyz="-0.0309209872306562 3.23539879690249E-06 -0.0152773685428462" rpy="0 0 0"/>
+      <mass value="0.0390728545580843"/>
+      <inertia ixx="2.12254038042128E-06" ixy="-7.87058200430504E-09" ixz="4.36806015539983E-08" iyy="2.22704672128094E-05" iyz="-1.30708363575153E-08" izz="2.35878653175813E-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/front_camera.STL"/>
+      </geometry>
+      <material name="mat_front_cam">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/front_camera.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="front_camera_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="front_camera_connector"/>
+    <child  link="front_camera"/>
+    <axis   xyz="0 0 0"/>
+  </joint>
+
+  <!-- 右相机 -->
+  <link name="right_camera_connector">
+    <inertial>
+      <origin xyz="-0.0809786336731191 -0.00378950029242064 -0.0237101304373128" rpy="0 0 0"/>
+      <mass value="0.0424586300382291"/>
+      <inertia ixx="1.06535113795693E-05" ixy="-5.04368405013625E-06" ixz="1.33521315909431E-05" iyy="7.76037463401666E-05" iyz="1.34098123293272E-06" izz="7.42856674929988E-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/right_camera_connector.STL"/>
+      </geometry>
+      <material name="mat_right_conn">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/right_camera_connector.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="right_camera_connector_joint" type="fixed">
+    <origin xyz="-0.00809180486562011 -0.243189954271478 1.38793619493377" rpy="-1.83536937264476 0.143241941171723 -1.08585342009448"/>
+    <parent link="aluminum_profiles"/>
+    <child  link="right_camera_connector"/>
+    <axis   xyz="0 0 0"/>
+  </joint>
+
+  <link name="right_camera">
+    <inertial>
+      <origin xyz="-0.0305808623823811 0.00457294394317898 -0.015277347959137" rpy="0 0 0"/>
+      <mass value="0.0390729458933352"/>
+      <inertia ixx="2.56028919194319E-06" ixy="2.93740214498048E-06" ixz="4.12676432945616E-08" iyy="2.18327154651197E-05" iyz="-1.93816371738505E-08" izz="2.35878602521843E-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/right_camera.STL"/>
+      </geometry>
+      <material name="mat_right_cam">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/right_camera.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="right_camera_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="right_camera_connector"/>
+    <child  link="right_camera"/>
+    <axis   xyz="0 0 0"/>
+  </joint>
+
+  <!-- 左相机 -->
+  <link name="left_camera_connector">
+    <inertial>
+      <origin xyz="-0.0809790467378556 0.00378959958392278 -0.023710062717789" rpy="0 0 0"/>
+      <mass value="0.0424596542130664"/>
+      <inertia ixx="1.06535025385193E-05" ixy="5.04362225319599E-06" ixz="1.33522691042879E-05" iyy="7.76044975501618E-05" iyz="-1.34094438858984E-06" izz="7.42864348773652E-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/left_camera_connector.STL"/>
+      </geometry>
+      <material name="mat_left_conn">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/left_camera_connector.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="left_camera_connector_joint" type="fixed">
+    <origin xyz="-0.00809180486558025 0.24318995427147 1.38293619493377" rpy="1.83536937264474 0.143241941171711 1.08585342009429"/>
+    <parent link="aluminum_profiles"/>
+    <child  link="left_camera_connector"/>
+    <axis   xyz="0 0 0"/>
+  </joint>
+
+  <link name="left_camera">
+    <inertial>
+      <origin xyz="-0.0305818220759545 -0.00456655648789173 -0.015277346505856" rpy="0 0 0"/>
+      <mass value="0.0390729552592179"/>
+      <inertia ixx="2.56488237190881E-06" ixy="-2.95245624329751E-06" ixz="4.51297628121895E-08" iyy="2.18281180418158E-05" iyz="-6.46988175284857E-09" izz="2.35878567523682E-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/left_camera.STL"/>
+      </geometry>
+      <material name="mat_left_cam">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/left_camera.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="left_camera_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="left_camera_connector"/>
+    <child  link="left_camera"/>
+    <axis   xyz="0 0 0"/>
+  </joint>
+
+  <!-- ========== 机械臂 ========================= -->
+  <link name="arm_base">
+    <inertial>
+      <origin xyz="0.0023772 -1.1034E-06 0.040484" rpy="0 0 0"/>
+      <mass value="0.11527"/>
+      <inertia ixx="0.00027407" ixy="-8.8143E-10" ixz="1.1985E-05" iyy="0.00025808" iyz="2.8992E-09" izz="0.00034593"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/arm_base.STL"/>
+      </geometry>
+      <material name="mat_arm_base">
+        <color rgba="0.168 0.164 0.17 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/arm_base.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="arm_joint0" type="fixed">
+    <origin xyz="0.1725 0 0.42568" rpy="0 0 0"/>
+    <parent link="aluminum_profiles"/>
+    <child  link="arm_base"/>
+    <axis   xyz="1 0 0"/>
+    <limit lower="0" upper="0" effort="0" velocity="0"/>
+  </joint>
+
+  <link name="arm_seg1">
+    <inertial>
+      <origin xyz="-3.5637E-05 -0.0014858 0.06674" rpy="0 0 0"/>
+      <mass value="0.40929"/>
+      <inertia ixx="0.00030861" ixy="-1.101E-08" ixz="1.6059E-07" iyy="0.00048311" iyz="-1.4527E-07" izz="0.00029888"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/arm_seg1.STL"/>
+      </geometry>
+      <material name="mat_arm_seg1">
+        <color rgba="0.1 0.1 0.1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/arm_seg1.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="arm_joint1" type="revolute">
+    <origin xyz="-5.4004E-05 0 0.078" rpy="0 0 3.1416"/>
+    <parent link="arm_base"/>
+    <child  link="arm_seg1"/>
+    <axis   xyz="0 0 1"/>
+    <limit  lower="-2.88" upper="2.88" effort="40" velocity="20"/>
+  </joint>
+
+  <link name="arm_seg2">
+    <inertial>
+      <origin xyz="0.17311 0.018051 0.00018529" rpy="0 0 0"/>
+      <mass value="0.35351"/>
+      <inertia ixx="0.00024494" ixy="-0.00011361" ixz="-1.1169E-06" iyy="0.0015823" iyz="-3.7508E-07" izz="0.0015532"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/arm_seg2.STL"/>
+      </geometry>
+      <material name="mat_arm_seg2">
+        <color rgba="0.55 0.54 0.53 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/arm_seg2.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="arm_joint2" type="revolute">
+    <origin xyz="-5.4004E-05 0 0.07" rpy="1.5708 0 0"/>
+    <parent link="arm_seg1"/>
+    <child  link="arm_seg2"/>
+    <axis   xyz="0 0 1"/>
+    <limit  lower="0" upper="3.14" effort="40" velocity="20"/>
+  </joint>
+
+  <link name="arm_seg3">
+    <inertial>
+      <origin xyz="0.043399 0.054752 0.00028446" rpy="0 0 0"/>
+      <mass value="0.21174"/>
+      <inertia ixx="0.00081898" ixy="-0.00016142" ixz="-3.5755E-07" iyy="0.00018731" iyz="-2.3011E-06" izz="0.00083755"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/arm_seg3.STL"/>
+      </geometry>
+      <material name="mat_arm_seg3">
+        <color rgba="0.45 0.44 0.44 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/arm_seg3.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="arm_joint3" type="revolute">
+    <origin xyz="0.34928 0.02 0" rpy="0 0 1.5708"/>
+    <parent link="arm_seg2"/>
+    <child  link="arm_seg3"/>
+    <axis   xyz="0 0 1"/>
+    <limit  lower="-3.3" upper="0" effort="27" velocity="7.5"/>
+  </joint>
+
+  <link name="arm_seg4">
+    <inertial>
+      <origin xyz="-0.00135291345380234 -0.0049980799944554 0.234371357724064" rpy="0 0 0"/>
+      <mass value="0.0599040156102227"/>
+      <inertia ixx="6.61796983160363E-05" ixy="1.30677924584631E-07" ixz="-8.43667627059607E-07" iyy="7.05845635270195E-05" iyz="3.24038442300584E-06" izz="2.61984540478227E-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/arm_seg4.STL"/>
+      </geometry>
+      <material name="mat_arm_seg4">
+        <color rgba="0.15 0.16 0.14 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/arm_seg4.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="arm_joint4" type="revolute">
+    <origin xyz="0.069884 0 0" rpy="-1.5708 1.5708 0"/>
+    <parent link="arm_seg3"/>
+    <child  link="arm_seg4"/>
+    <axis   xyz="0 0 1"/>
+    <limit  lower="-2.88" upper="2.88" effort="7" velocity="25"/>
+  </joint>
+
+  <link name="arm_seg5">
+    <inertial>
+      <origin xyz="6.85116779968742E-05 -0.0556274007824661 0.00388287915603674" rpy="0 0 0"/>
+      <mass value="0.142243012088433"/>
+      <inertia ixx="7.77689196142754E-05" ixy="7.77781558706648E-08" ixz="2.59994721234632E-08" iyy="6.35108922113425E-05" iyz="-7.54473957250096E-06" izz="7.59377753113413E-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/arm_seg5.STL"/>
+      </geometry>
+      <material name="mat_arm_seg5">
+        <color rgba="0.35 0.33 0.34 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/arm_seg5.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="arm_joint5" type="revolute">
+    <origin xyz="0 0 0.27865" rpy="-1.5708 0 3.1416"/>
+    <parent link="arm_seg4"/>
+    <child  link="arm_seg5"/>
+    <axis   xyz="0 0 1"/>
+    <limit  lower="-1.65" upper="1.65" effort="7" velocity="25"/>
+  </joint>
+
+  <link name="arm_seg6">
+    <inertial>
+      <origin xyz="1.40221168010157E-13 -1.50601753290402E-13 -0.0377661077969969" rpy="0 0 0"/>
+      <mass value="0.182741457460028"/>
+      <inertia ixx="0.000117279908572708" ixy="3.39676727241662E-21" ixz="2.45495951487491E-20" iyy="0.000115165704648131" iyz="-9.38306172926262E-20" izz="7.42042523797467E-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/arm_seg6.STL"/>
+      </geometry>
+      <material name="mat_arm_seg6">
+        <color rgba="0.1 0.1 0.1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/arm_seg6.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="arm_joint6" type="revolute">
+    <origin xyz="0 -0.1595 0" rpy="1.5708 0 0"/>
+    <parent link="arm_seg5"/>
+    <child  link="arm_seg6"/>
+    <axis   xyz="0 0 1"/>
+    <limit  lower="-2.88" upper="2.88" effort="7" velocity="25"/>
+  </joint>
+
+  <!-- 夹爪gripper2 会模仿 gripper1 的运动，保持同步开合，gripper是那个手指快，axis是控制开合的那个轴 -->
+  <link name="gripper1">
+    <inertial>
+      <origin xyz="0.0168291746587449 -0.00522649881944856 -0.00144440352705599" rpy="0 0 0"/>
+      <mass value="0.0203107399706208"/>
+      <inertia ixx="2.41970140639046E-06" ixy="2.91762676816698E-08" ixz="4.13154728542262E-07" iyy="6.63902263104411E-06" iyz="-6.48988490681016E-08" izz="5.8932894493705E-06"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/gripper1.STL"/>
+      </geometry>
+      <material name="mat_gripper1">
+        <color rgba="0.2 0.2 0.2 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/gripper1.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="gripper1_axis" type="prismatic">
+    <origin xyz="0 0 0" rpy="3.1416 -1.5708 1.5708"/>
+    <parent link="arm_seg6"/>
+    <child  link="gripper1"/>
+    <axis   xyz="0 0 1"/>
+    <limit  lower="0" upper="0.03" effort="200" velocity="0.25"/>
+  </joint>
+
+  <link name="gripper2">
+    <inertial>
+      <origin xyz="0.0168291746841619 -0.00522649840104583 -0.00144440157200088" rpy="0 0 0"/>
+      <mass value="0.0203107422665205"/>
+      <inertia ixx="2.41970147955987E-06" ixy="2.91762130603697E-08" ixz="4.13154966899769E-07" iyy="6.63902321313933E-06" iyz="-6.48988117179259E-08" izz="5.89328967929843E-06"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/gripper2.STL"/>
+      </geometry>
+      <material name="mat_gripper2">
+        <color rgba="0.2 0.2 0.2 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/gripper2.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="gripper2_axis" type="prismatic">
+    <origin xyz="0 0 0" rpy="0 -1.5708 1.5708"/>
+    <parent link="arm_seg6"/>
+    <child  link="gripper2"/>
+    <axis   xyz="0 0 1"/>
+    <limit  lower="0" upper="0.03" effort="200" velocity="0.25"/>
+    <mimic joint="gripper1_axis" multiplier="1" offset="0"/>
+  </joint>
+
+  <!-- 腕相机连接器 -->
+  <link name="wrist_camera_connector">
+    <inertial>
+      <origin xyz="-0.0489143840503385 -0.0102112464280971 0.0254550113360379" rpy="0 0 0"/>
+      <mass value="0.0439585128445216"/>
+      <inertia ixx="4.71461639049907E-05" ixy="-2.9399355673279E-06" ixz="9.45772930526132E-06" iyy="4.00014206879286E-05" iyz="1.11112383550961E-05" izz="3.65278170577252E-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/wrist_camera_connector.STL"/>
+      </geometry>
+      <material name="mat_wrist_conn">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/wrist_camera_connector.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="wrist_camera_connector_joint" type="fixed">
+    <origin xyz="0.035 0 -0.007" rpy="0 -1.5708 3.1416"/>
+    <parent link="arm_seg6"/>
+    <child  link="wrist_camera_connector"/>
+    <axis   xyz="0 0 0"/>
+  </joint>
+
+  <link name="wrist_camera">
+    <inertial>
+      <origin xyz="-0.0309210000846911 3.23066871676936E-06 -0.0152773632101434" rpy="0 0 0"/>
+      <mass value="0.0390728490703921"/>
+      <inertia ixx="2.12256623238987E-06" ixy="-7.8637188170015E-09" ixz="4.36789652512015E-08" iyy="2.22704433478096E-05" iyz="-1.30699449422066E-08" izz="2.3587868169119E-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/wrist_camera.STL"/>
+      </geometry>
+      <material name="mat_wrist_cam">
+        <color rgba="0.83 0.82 0.82 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="new_meshes/wrist_camera.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="wrist_camera_joint" type="fixed">
+    <origin xyz="-0.028107 0.002 0.034342" rpy="1.9199 0 1.5708"/>
+    <parent link="wrist_camera_connector"/>
+    <child  link="wrist_camera"/>
+    <axis   xyz="0 0 0"/>
+  </joint>
+
+  <!-- ========== 根关节（虚拟平面移动 + 旋转） ========================= -->
+  <!-- ① 给空壳 root_link1 补极小惯性 -->
+  <link name="root_link1">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1e-6"/>
+      <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9"/>
+    </inertial>
+  </link>
+
+  <!-- ② 给可动 root_link2 补极小惯性（> mjMINVAL） -->
+  <link name="root_link2">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1e-6"/>
+      <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9"/>
+    </inertial>
+  </link>
+
+  <!-- ③ 给 root_link3 同样补极小惯性 -->
+  <link name="root_link3">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1e-6"/>
+      <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9"/>
+    </inertial>
+  </link>
+
+  <joint name="root_x_axis_joint" type="prismatic">
+    <parent link="root_link1"/>
+    <child  link="root_link2"/>
+    <axis   xyz="1 0 0"/>
+    <limit  effort="100" lower="-10" upper="10" velocity="0.50"/>
+    <dynamics damping="10.0" friction="10"/>
+  </joint>
+
+  <joint name="root_y_axis_joint" type="prismatic">
+    <parent link="root_link2"/>
+    <child  link="root_link3"/>
+    <axis   xyz="0 1 0"/>
+    <limit  effort="100" lower="-10" upper="10" velocity="0.50"/>
+    <dynamics damping="10.0" friction="10"/>
+  </joint>
+
+  <joint name="root_z_rotation_joint" type="revolute">
+    <parent link="root_link3"/>
+    <child  link="rgm3_base_link"/>
+    <axis   xyz="0 0 1"/>
+    <limit  effort="100" lower="-6.28" upper="6.28" velocity="0.50"/>
+    <dynamics damping="10.0" friction="1"/>
+  </joint>
+
+</robot>

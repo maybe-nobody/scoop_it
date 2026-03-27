@@ -1,0 +1,176 @@
+<mujoco model="xarm6_right">
+    <compiler angle="radian" meshdir="../meshes/" autolimits="true"/>
+    <!-- <size njmax="500" nconmax="100" /> -->
+    <option integrator="RK4"/>
+    <asset>
+        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3"
+        rgb2=".2 .3 .4" width="300" height="300" mark="edge" markrgb=".2 .3 .4"/>
+        <material name="grid" texture="grid" texrepeat="2 2" texuniform="true"
+        reflectance=".2"/>
+        <mesh name="Arm_base_Link" file="Arm_base_Link.STL" />
+        <mesh name="arm_seg1" file="arm_seg1.STL" />
+        <mesh name="arm_seg2" file="arm_seg2.STL" />
+        <mesh name="arm_seg3" file="arm_seg3.STL" />
+        <mesh name="arm_seg4" file="arm_seg4.STL" />
+        <mesh name="arm_seg5" file="arm_seg5.STL" />
+        <mesh name="arm_seg6" file="arm_seg6.STL" />
+    </asset>
+    <default>
+        <joint damping="1"/>
+    </default>
+    <worldbody>
+        <light pos="0 0 1" mode="trackcom" diffuse="1 1 1" />
+        <geom name="ground" type="plane" pos="0 0 -.5" size="2 2 .1" material="grid" solimp=".99 .99 .01" solref=".001 1"/>
+        <body name="arm_base">
+            <geom name="arm_base" type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="Arm_base_Link" />
+            <geom type="mesh" rgba="1 1 1 1" mesh="Arm_base_Link" />
+        </body>
+        <body name="arm_seg1"
+              pos="0 0 0"
+              quat="0 0 0 1">
+            <inertial
+                pos="-3.5637e-05 -0.0014858 0.06674"
+                quat="1 0 0 0"
+                mass="5.40929"
+                diaginertia="0.030861 0.048311 0.029888" />
+            <joint name="arm_joint1"
+                    type="hinge"
+                    pos="0 0 0"
+                    axis="0 0 1"
+                    limited="true"
+                    range="-165.1 165.1"
+                    damping="1"
+                    frictionloss="1" />
+            <geom type="mesh" mesh="arm_seg1" contype="0" conaffinity="0" group="1" />
+
+            <!-- ================== link2 / joint2 ================== -->
+            <!-- URDF: joint arm_joint2, parent arm_seg1, child arm_seg2
+                  origin xyz="-5.4004E-05 0 0.07", rpy="1.5708 0 0"
+                  rpy→quat ≈ [w x y z] = [0.707105, 0.707108, 0, 0] -->
+            <body name="arm_seg2"
+                  pos="-5.4004e-05 0 0.07"
+                  quat="0.707105 0.707108 0 0">
+                <inertial
+                    pos="0.17311 0.018051 0.00018529"
+                    quat="1 0 0 0"
+                    mass="3.35351"
+                    diaginertia="0.024494 0.15823 0.15532" />
+                <joint name="arm_joint2"
+                        type="hinge"
+                        pos="0 0 0"
+                        axis="0 0 1"
+                        limited="true"
+                        range="0 180"
+                        damping="1"
+                        frictionloss="1" />
+                <geom type="mesh" mesh="arm_seg2" contype="0" conaffinity="0" group="1" />
+
+                <!-- ================== link3 / joint3 ================== -->
+                <!-- URDF: joint arm_joint3, parent arm_seg2, child arm_seg3
+                      origin xyz="0.34928 0.02 0", rpy="0 0 1.5708"
+                      rpy→quat ≈ [0.707105, 0, 0, 0.707108] -->
+                <body name="arm_seg3"
+                      pos="0.34928 0.02 0"
+                      quat="0.707105 0 0 0.707108">
+                    <inertial
+                        pos="0.043399 0.054752 0.00028446"
+                        quat="1 0 0 0"
+                        mass="3.21174"
+                        diaginertia="0.081898 0.018731 0.083755" />
+                    <joint name="arm_joint3"
+                            type="hinge"
+                            pos="0 0 0"
+                            axis="0 0 1"
+                            limited="true"
+                            range="-180 0"
+                            damping="1"
+                            frictionloss="1" />
+                    <geom type="mesh" mesh="arm_seg3" contype="0" conaffinity="0" group="1" />
+
+                    <!-- ================== link4 / joint4 ================== -->
+                    <!-- URDF: joint arm_joint4, parent arm_seg3, child arm_seg4
+                          origin xyz="0.069884 0 0", rpy="-1.5708 1.5708 0"
+                          rpy→quat ≈ [0.499998, -0.5, 0.5, 0.500002] -->
+                    <body name="arm_seg4"
+                          pos="0.069884 0 0"
+                          quat="0.499998 -0.5 0.5 0.500002">
+                        <inertial
+                            pos="-0.00135291345380234 -0.0049980799944554 0.234371357724064"
+                            quat="1 0 0 0"
+                            mass="3.0599040156102227"
+                            diaginertia="6.61796983160363e-03 7.05845635270195e-03 2.61984540478227e-03" />
+                        <joint name="arm_joint4"
+                                type="hinge"
+                                pos="0 0 0"
+                                axis="0 0 1"
+                                limited="true"
+                                range="-165.1 165.1"
+                                damping="1"
+                                frictionloss="1" />
+                        <geom type="mesh" mesh="arm_seg4" contype="0" conaffinity="0" group="1" />
+
+                        <!-- ================== link5 / joint5 ================== -->
+                        <!-- URDF: joint arm_joint5, parent arm_seg4, child arm_seg5
+                              origin xyz="0 0 0.27865", rpy="-1.5708 0 3.1416"
+                              rpy→quat ≈ [-3e-06, 3e-06, -0.707108, 0.707105] -->
+                        <body name="arm_seg5"
+                              pos="0 0 0.27865"
+                              quat="-0.000003 0.000003 -0.707108 0.707105">
+                            <inertial
+                                pos="6.85116779968742e-05 -0.0556274007824661 0.00388287915603674"
+                                quat="1 0 0 0"
+                                mass="3.142243012088433"
+                                diaginertia="7.77689196142754e-03 6.35108922113425e-03 7.59377753113413e-03" />
+                            <joint name="arm_joint5"
+                                    type="hinge"
+                                    pos="0 0 0"
+                                    axis="0 0 1"
+                                    limited="true"
+                                    range="-94.58 94.58"
+                                    damping="1"
+                                    frictionloss="1" />
+                            <geom type="mesh" mesh="arm_seg5" contype="0" conaffinity="0" group="1" />
+
+                            <!-- ================== link6 / joint6 ================== -->
+                            <!-- URDF: joint arm_joint6, parent arm_seg5, child arm_seg6
+                                  origin xyz="0 -0.1595 0", rpy="1.5708 0 0"
+                                  rpy→quat ≈ [0.707105, 0.707108, 0, 0] -->
+                            <body name="arm_seg6"
+                                  pos="0 -0.1595 0"
+                                  quat="0.707105 0.707108 0 0">
+                                <inertial
+                                    pos="1.40221168010157e-13 -1.50601753290402e-13 -0.0377661077969969"
+                                    quat="1 0 0 0"
+                                    mass="3.182741457460028"
+                                    diaginertia="0.0117279908572708 0.0115165704648131 7.42042523797467e-03" />
+                                <joint name="arm_joint6"
+                                        type="hinge"
+                                        pos="0 0 0"
+                                        axis="0 0 1"
+                                        limited="true"
+                                        range="-165.1 165.1"
+                                        damping="1"
+                                        frictionloss="1" />
+                                <geom type="mesh" mesh="arm_seg6" contype="0" conaffinity="0" group="1" />
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+        </body>  
+    </worldbody>
+    <contact>
+        <!-- <exclude body1="link6" body2="link_12.0" />
+        <exclude body1="link6" body2="link_13.0" /> -->
+        <!-- <exclude body1="link_12.0" body2="link_13.0" /> -->
+    </contact>
+    <!-- Define the actuators for all the joints -->
+    <actuator> 
+        <motor joint="arm_joint1" ctrlrange="-100 100" />
+        <motor joint="arm_joint2" ctrlrange="-100 100" />
+        <motor joint="arm_joint3" ctrlrange="-100 100" />
+        <motor joint="arm_joint4" ctrlrange="-100 100" />
+        <motor joint="arm_joint5" ctrlrange="-100 100" />
+        <motor joint="arm_joint6" ctrlrange="-100 100" />
+    </actuator>
+</mujoco>
