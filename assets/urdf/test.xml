@@ -1,5 +1,5 @@
 <mujoco model="chassis_with_arm">
-    <compiler meshdir="/home/lsq/catch_it/assets/urdf/meshes"/>
+    <compiler meshdir="/home/lsq/scoop_it/assets/urdf/meshes"/>
 
 
 
@@ -10,11 +10,11 @@
         <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>
         <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3"
         markrgb="0.8 0.8 0.8" width="300" height="300"/>
-        <texture file="/home/lsq/catch_it/assets/textures/light-wood.png" name="woodplane" type="2d"/>
+        <texture file="/home/lsq/scoop_it/assets/textures/light-wood.png" name="woodplane" type="2d"/>
         <material name="groundplane" texture="woodplane" texuniform="true" texrepeat="5 5" reflectance="0.2"/>
         <!-- object-bottle -->
         <mesh file="./bottle.stl" name="bottle_mesh" scale="0.8 0.8 0.8"/>
-        <texture type="skybox" file="/home/lsq/catch_it/assets/textures/glass.png" name="tex-glass"/>
+        <texture type="skybox" file="/home/lsq/scoop_it/assets/textures/glass.png" name="tex-glass"/>
         <material name="glass" reflectance="0.5" texrepeat="5 5" texture="tex-glass" texuniform="true"/>
         <mesh file="./bread.stl" name="bread_mesh" scale="1 1 1"/>
         <mesh file="./cup.stl" name="cup_mesh" scale="0.7 0.7 0.7"/>
@@ -22,10 +22,10 @@
         <mesh file="./winnercup.stl" name="winnercup_mesh" scale="3e-4 3e-4 3e-4"/>
         <!-- object-can -->
         <mesh file="./can.stl" name="can_mesh"/>
-        <texture file="/home/lsq/catch_it/assets/textures/soda.png" name="tex-can" type="2d"/>
+        <texture file="/home/lsq/scoop_it/assets/textures/soda.png" name="tex-can" type="2d"/>
         <material name="coke" reflectance="0.7" texrepeat="5 5" texture="tex-can" texuniform="true"/>
         <!-- object red can-->
-        <texture file="/home/lsq/catch_it/assets/textures/red-wood.png" name="tex-red-can" type="2d"/>
+        <texture file="/home/lsq/scoop_it/assets/textures/red-wood.png" name="tex-red-can" type="2d"/>
         <material name="red-coke" reflectance="0.7" texrepeat="5 5" texture="tex-red-can" texuniform="true"/>
         <!-- mobile manipulator -->
         <!-- Ranger Mini V2 -->
@@ -415,7 +415,7 @@
                 </body> <!-- arm_seg2 -->
             </body> <!-- arm_seg1 -->    
         </body>
-        <body name="base_link_copy" pos="2 0 0.105" axisangle="1 0 0 0.00872664626">
+        <body name="base_link_copy" pos="0 2 0.105" axisangle="0 0 1 0">
         <!-- overall mass = 113.434 kg body只给出一个“刚体原点”——也就是它自己的局部坐标系，加什么是geom说的算-->
             <!-- camera -->
             <camera name="top_copy" mode="fixed" pos="0.0 -0.125 1.3325" axisangle="1 0 0 1.2" fovy="58"/>
@@ -426,7 +426,7 @@
             <!-- joint 的“下面”永远连着它所在 <body> 标签内部第一个被声明的子 body。 -->
             <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="base_link" />
             <!-- 这些 geom 都属于当前这个 body（base_link），它们不是独立的刚体，而是这个 body 的组成部分。 -->
-            <geom name="ranger_base_copy" type="mesh" rgba="1 1 1 1" mesh="base_link" />
+            <geom name="ranger_base_copy" type="mesh" rgba="1 1 1 1" mesh="base_link"/>
             <geom pos="-0.0244824 -0.37251 0.279423" quat="0 0 0.710185 0.704015" type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="Box_Link" />
             <geom pos="-0.0244824 -0.37251 0.279423" quat="0 0 0.710185 0.704015" type="mesh" rgba="1 1 1 1" mesh="Box_Link" />
             <geom pos="-0.133 -0.214889 0.292686" quat="0.502177 0.497814 0.497814 -0.502177" type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="l1_Link" />
@@ -457,7 +457,7 @@
             <geom pos="-0.113 0.237202 0.243739" quat="0.502177 0.497814 -0.502177 -0.497814" type="mesh" rgba="1 1 1 1" mesh="l6_Link" />
             <geom pos="0.113 0.237202 0.243739" quat="0.502177 0.497814 -0.502177 -0.497814" type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="l7_Link" />
             <geom pos="0.113 0.237202 0.243739" quat="0.502177 0.497814 -0.502177 -0.497814" type="mesh" rgba="1 1 1 1" mesh="l7_Link" />
-            <body name="arm_base_copy" pos="0 0.118467 0.297778" quat="1 0.0 0.0 0.0" >
+            <body name="arm_base_copy" pos="0 0.118467 0.297778" axisangle="0 0 1 0" >
                 <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="Arm_base_Link" />
                 <geom type="mesh" rgba="1 1 1 1" mesh="Arm_base_Link" />
             </body>

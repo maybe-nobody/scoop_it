@@ -7,7 +7,7 @@ robot_cfg:
     usd_flip_joints: []
     usd_flip_joints: {}
     usd_flip_joint_limits: []
-    urdf_path: "/home/lsq/catch_it/assets/urdf/a1arm_rgm3.xml"
+    urdf_path: "/home/lsq/scoop_it/assets/new_meshes/a1arm_rgm3.xml"
     asset_root_path: ""
     base_link: "root_link1"
     ee_link: "arm_seg6"
@@ -30,7 +30,7 @@ robot_cfg:
         "rgm3_tires_link",
         "aluminum_profiles"
       ]
-    collision_spheres: "/home/lsq/catch_it/assets/urdf/a1arm_rgm3_sphere_database.yaml"
+    collision_spheres: "/home/lsq/scoop_it/assets/new_meshes/a1arm_rgm3_sphere_database.yaml"
     collision_sphere_buffer: 0.002 #0.02
     extra_collision_spheres: {}
     use_global_cumul: True

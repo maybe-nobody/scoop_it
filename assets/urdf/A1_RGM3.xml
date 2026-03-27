@@ -1,0 +1,327 @@
+<mujoco model="A1_RGM3">
+  <compiler angle="radian" coordinate="local" inertiafromgeom="true"/>
+  <option timestep="0.004166" gravity="0 0 -9.81"/>
+
+  <default>
+    <joint damping="1" armature="0.01"/>
+    <geom friction="1.2 0.05 0.001" density="1000"/>
+    <motor ctrlrange="-1 1"/>
+  </default>
+  <!-- <visual>
+        <headlight ambient="0.6 0.6 0.6" diffuse="0.4 0.4 0.4" specular="0.1 0.1 0.1"/>
+  </visual> -->
+  <asset>
+    <texture name="texplane" builtin="checker" rgb1=".2 .3 .4" rgb2=".1 .2 .3" 
+             type="2d" width="512" height="512" mark="cross" markrgb=".8 .8 .8"/>
+    
+    <material name="matplane" reflectance="0.3" texture="texplane" texrepeat="1 1" texuniform="true"/>
+  </asset>
+  <asset>
+    <!-- chassis -->
+    <mesh name="chassis" file="/home/lsq/scoop_it/assets/new_meshes/chassis_base.STL"/>
+    <mesh name="base_link" file="/home/lsq/scoop_it/assets/new_meshes/base_link.STL"/>
+
+    <!-- arm -->
+    <mesh name="arm1" file="/home/lsq/scoop_it/assets/new_meshes/arm_seg1.STL"/>
+    <mesh name="arm2" file="/home/lsq/scoop_it/assets/new_meshes/arm_seg2.STL"/>
+    <mesh name="arm3" file="/home/lsq/scoop_it/assets/new_meshes/arm_seg3.STL"/>
+    <mesh name="arm4" file="/home/lsq/scoop_it/assets/new_meshes/arm_seg4.STL"/>
+    <mesh name="arm5" file="/home/lsq/scoop_it/assets/new_meshes/arm_seg5.STL"/>
+    <mesh name="arm6" file="/home/lsq/scoop_it/assets/new_meshes/arm_seg6.STL"/>
+
+    <!-- gripper -->
+    <mesh name="gripper1" file="/home/lsq/scoop_it/assets/new_meshes/gripper1.STL"/>
+    <mesh name="gripper2" file="/home/lsq/scoop_it/assets/new_meshes/gripper2.STL"/>
+
+    <!-- wheels -->
+    <mesh name="steer_fl" file="/home/lsq/scoop_it/assets/new_meshes/steer_fl.STL"/>
+    <mesh name="steer_fr" file="/home/lsq/scoop_it/assets/new_meshes/steer_fr.STL"/>
+    <mesh name="steer_rl" file="/home/lsq/scoop_it/assets/new_meshes/steer_rl.STL"/>
+    <mesh name="steer_rr" file="/home/lsq/scoop_it/assets/new_meshes/steer_rr.STL"/>
+
+    <mesh name="wheel_fl" file="/home/lsq/scoop_it/assets/new_meshes/wheel_fl.STL"/>
+    <mesh name="wheel_fr" file="/home/lsq/scoop_it/assets/new_meshes/wheel_fr.STL"/>
+    <mesh name="wheel_rl" file="/home/lsq/scoop_it/assets/new_meshes/wheel_rl.STL"/>
+    <mesh name="wheel_rr" file="/home/lsq/scoop_it/assets/new_meshes/wheel_rr.STL"/>
+  </asset>
+
+  <contact>
+    <exclude body1="base_link" body2="steer_fl"/>
+    <exclude body1="base_link" body2="steer_fr"/>
+    <exclude body1="base_link" body2="steer_rl"/>
+    <exclude body1="base_link" body2="steer_rr"/>
+
+    <exclude body1="base_link" body2="wheel_fl"/>
+    <exclude body1="base_link" body2="wheel_fr"/>
+    <exclude body1="base_link" body2="wheel_rl"/>
+    <exclude body1="base_link" body2="wheel_rr"/>
+
+    <exclude body1="steer_fl" body2="wheel_fl"/>
+    <exclude body1="steer_fr" body2="wheel_fr"/>
+    <exclude body1="steer_rl" body2="wheel_rl"/>
+    <exclude body1="steer_rr" body2="wheel_rr"/>
+
+    <exclude body1="gripper1_copy" body2="gripper2_copy"/>
+    <exclude body1="base_link_copy" body2="steer_fl_copy"/>
+    <exclude body1="base_link_copy" body2="steer_fr_copy"/>
+    <exclude body1="base_link_copy" body2="steer_rl_copy"/>
+    <exclude body1="base_link_copy" body2="steer_rr_copy"/>
+
+    <exclude body1="base_link_copy" body2="wheel_fl_copy"/>
+    <exclude body1="base_link_copy" body2="wheel_fr_copy"/>
+    <exclude body1="base_link_copy" body2="wheel_rl_copy"/>
+    <exclude body1="base_link_copy" body2="wheel_rr_copy"/>
+
+    <exclude body1="steer_fl_copy" body2="wheel_fl_copy"/>
+    <exclude body1="steer_fr_copy" body2="wheel_fr_copy"/>
+    <exclude body1="steer_rl_copy" body2="wheel_rl_copy"/>
+    <exclude body1="steer_rr_copy" body2="wheel_rr_copy"/>
+
+    <exclude body1="gripper1" body2="gripper2"/>
+  </contact>
+
+  <worldbody>
+    <!-- floor -->
+    <geom name="floor" type="plane" size="5 5 0.1" friction="1.5 0.05 0.001" material="matplane"/>
+    <light directional="true" diffuse="0.8 0.8 0.8" specular="0.2 0.2 0.2" pos="0 0 5" dir="0 0 -1" ambient="0.4 0.4 0.4" castshadow="false"/>
+    <!-- ================= BASE ================= -->
+    <body name="base_link" pos="0 0 0.35" quat="1 0 0 0">
+      <freejoint/>
+      <geom type="mesh" mesh="chassis" mass="70"/>
+
+      <!-- ========== FRONT LEFT ========== -->
+      <body name="steer_fl" pos="0.247 0.18514 0" quat="1 0 0 0">
+        <joint name="steer_fl" axis="0 0 1" range="-1.57 1.57"/>
+        <geom type="mesh" mesh="steer_fl"/>
+
+        <body name="wheel_fl" pos="0 0 -0.229680624556422" quat="-0.5 0.5 0.5 0.5">
+          <joint name="wheel_fl" type="hinge" axis="0 0 1"/>
+          <geom type="mesh" mesh="wheel_fl"/>
+        </body>
+      </body>
+
+      <!-- ========== FRONT RIGHT ========== -->
+      <body name="steer_fr" pos="0.247 -0.185 0" quat="1 0 0 0">
+        <joint name="steer_fr" axis="0 0 1" range="-1.57 1.57"/>
+        <geom type="mesh" mesh="steer_fr"/>
+
+        <body name="wheel_fr" pos="0 0 -0.23" quat="-0.5 0.5 0.5 0.5">
+          <joint name="wheel_fr" type="hinge" axis="0 0 1"/>
+          <geom type="mesh" mesh="wheel_fr"/>
+        </body>
+      </body>
+
+      <!-- ========== REAR LEFT ========== -->
+      <body name="steer_rl" pos="-0.247 0.187 0" quat="1 0 0 0">
+        <joint name="steer_rl" axis="0 0 1" range="-1.57 1.57"/>
+        <geom type="mesh" mesh="steer_rl"/>
+
+        <body name="wheel_rl" pos="0 0 -0.23" quat="-0.5 0.5 0.5 0.5">
+          <joint name="wheel_rl" type="hinge" axis="0 0 1"/>
+          <geom type="mesh" mesh="wheel_rl"/>
+        </body>
+      </body>
+
+      <!-- ========== REAR RIGHT ========== -->
+      <body name="steer_rr" pos="-0.247 -0.189 0" quat="1 0 0 0">
+        <joint name="steer_rr" axis="0 0 1" range="-1.57 1.57"/>
+        <geom type="mesh" mesh="steer_rr"/>
+
+        <body name="wheel_rr" pos="0 0 -0.23" quat="-0.5 0.5 0.5 0.5">
+          <joint name="wheel_rr" type="hinge" axis="0 0 1"/>
+          <geom type="mesh" mesh="wheel_rr"/>
+        </body>
+      </body>
+
+      <!-- ================= ARM ================= -->
+      <body name="arm_base" pos="0.204450000000064 0 0.056" quat="1 0 0 0">
+        <geom type="mesh" mesh="base_link"/>      
+        <body name="arm_seg1" pos="-0.0011147 0 0.0892" quat="0 0 0 1">
+            <joint name="arm_joint1" axis="0 0 1" range="-2.88 2.88"/>
+            <geom type="mesh" mesh="arm1"/>
+
+            <body name="arm_seg2" pos="0 0 0.0615" quat="0.707 0.707 0 0">
+              <joint name="arm_joint2" axis="0 0 1" range="0 3.14"/>
+              <geom type="mesh" mesh="arm2"/>
+
+              <body name="arm_seg3" pos="0.34928 0.02 0" quat="0.707 0 0 0.707">
+                  <joint name="arm_joint3" axis="0 0 1" range="-3.31 0"/>
+                  <geom type="mesh" mesh="arm3"/>
+
+                  <body name="arm_seg4" pos="0.07 -0.00395 0" quat="0.5 -0.5 0.5 0.5">
+                    <joint name="arm_joint4" axis="0 0 1" range="-2.88 2.88"/>
+                    <geom type="mesh" mesh="arm4"/>
+
+                    <body name="arm_seg5" pos="0 0 0.2776" quat="0 0 -0.707 0.707">
+                        <joint name="arm_joint5" axis="0 0 1" range="-1.66 1.66"/>
+                        <geom type="mesh" mesh="arm5"/>
+
+                        <body name="arm_seg6" pos="0 -0.1575 -0.00023266" quat="0.707 0.707 0 0">
+                        <joint name="arm_joint6" axis="0 0 1" range="-1.83 1.83"/>
+                        <geom type="mesh" mesh="arm6"/>
+
+                          <!-- grippers -->
+                          <body name="gripper1" pos="-0.014 0.011914 0.003125" quat="0.5 0.5 -0.5 0.5">
+                              <joint name="gripper1" type="slide" axis="0 0 1" range="0 0.03"/>
+                              <geom type="mesh" mesh="gripper1"/>
+                          </body>
+
+                          <body name="gripper2" pos="0.014 -0.011914 0.003125" quat="-0.5 0.5 0.5 0.5">
+                              <joint name="gripper2" type="slide" axis="0 0 1" range="0 0.03"/>
+                              <geom type="mesh" mesh="gripper2"/>
+                              <body name="disk" pos="0.13 0 0">
+                                  <geom name="disk_geom" 
+                                        type="cylinder" 
+                                        size="0.1 0.005" 
+                                        rgba="0.8 0.2 0.2 1" 
+                                        friction="1 0.005 0.0001" 
+                                        mass="0.5"/>
+                            </body>
+                          </body>
+                        </body><!-- arm_seg6   -->
+                    </body><!-- arm_seg5 -->
+                  </body><!-- arm_seg4 -->
+              </body><!-- arm_seg3 -->
+            </body><!-- arm_seg2 -->
+        </body><!-- arm_seg1 -->
+      </body><!-- arm_base -->
+    </body><!-- base_link -->
+
+    <body name="base_link_copy" pos="0.85 0 0.35" axisangle="0 0 1 3.1415">
+      <freejoint/>
+      <geom type="mesh" mesh="chassis" mass="70"/>
+
+      <!-- ========== FRONT LEFT ========== -->
+      <body name="steer_fl_copy" pos="0.247 0.18514 0" quat="1 0 0 0">
+        <joint name="steer_fl_copy" axis="0 0 1" range="-1.57 1.57"/>
+        <geom type="mesh" mesh="steer_fl"/>
+
+        <body name="wheel_fl_copy" pos="0 0 -0.229680624556422" quat="-0.5 0.5 0.5 0.5">
+          <joint name="wheel_fl_copy" type="hinge" axis="0 0 1"/>
+          <geom type="mesh" mesh="wheel_fl"/>
+        </body>
+      </body>
+
+      <!-- ========== FRONT RIGHT ========== -->
+      <body name="steer_fr_copy" pos="0.247 -0.185 0" quat="-1 0 0 0">
+        <joint name="steer_fr_copy" axis="0 0 1" range="-1.57 1.57"/>
+        <geom type="mesh" mesh="steer_fr"/>
+
+        <body name="wheel_fr_copy" pos="0 0 -0.23" quat="-0.5 0.5 0.5 0.5">
+          <joint name="wheel_fr_copy" type="hinge" axis="0 0 1"/>
+          <geom type="mesh" mesh="wheel_fr"/>
+        </body>
+      </body>
+
+      <!-- ========== REAR LEFT ========== -->
+      <body name="steer_rl_copy" pos="-0.247 0.187 0" quat="-1 0 0 0">
+        <joint name="steer_rl_copy" axis="0 0 1" range="-1.57 1.57"/>
+        <geom type="mesh" mesh="steer_rl"/>
+
+        <body name="wheel_rl_copy" pos="0 0 -0.23" quat="-0.5 0.5 0.5 0.5">
+          <joint name="wheel_rl_copy" type="hinge" axis="0 0 1"/>
+          <geom type="mesh" mesh="wheel_rl"/>
+        </body>
+      </body>
+
+      <!-- ========== REAR RIGHT ========== -->
+      <body name="steer_rr_copy" pos="-0.247 -0.189 0" quat="-1 0 0 0">
+        <joint name="steer_rr_copy" axis="0 0 1" range="-1.57 1.57"/>
+        <geom type="mesh" mesh="steer_rr"/>
+
+        <body name="wheel_rr_copy" pos="0 0 -0.23" quat="-0.5 0.5 0.5 0.5">
+          <joint name="wheel_rr_copy" type="hinge" axis="0 0 1"/>
+          <geom type="mesh" mesh="wheel_rr"/>
+        </body>
+      </body>
+
+        <!-- ================= ARM ================= -->
+      <body name="arm_base_copy" pos="0.204450000000064 0 0.056" quat="-1 0 0 0">
+        <geom type="mesh" mesh="base_link"/>      
+
+        <body name="arm_seg1_copy" pos="-0.0011147 0 0.0892" quat="0 0 0 1">
+            <joint name="arm_joint1_copy" axis="0 0 1" range="-2.88 2.88"/>
+            <geom type="mesh" mesh="arm1"/>
+
+            <body name="arm_seg2_copy" pos="0 0 0.0615" quat="0.707 0.707 0 0">
+            <joint name="arm_joint2_copy" axis="0 0 1" range="0 3.14"/>
+            <geom type="mesh" mesh="arm2"/>
+
+            <body name="arm_seg3_copy" pos="0.34928 0.02 0" quat="0.707 0 0 0.707">
+                <joint name="arm_joint3_copy" axis="0 0 1" range="-3.31 0"/>
+                <geom type="mesh" mesh="arm3"/>
+
+                <body name="arm_seg4_copy" pos="0.07 -0.00395 0" quat="0.5 -0.5 0.5 0.5">
+                <joint name="arm_joint4_copy" axis="0 0 1" range="-2.88 2.88"/>
+                <geom type="mesh" mesh="arm4"/>
+
+                <body name="arm_seg5_copy" pos="0 0 0.2776" quat="0 0 -0.707 0.707">
+                    <joint name="arm_joint5_copy" axis="0 0 1" range="-1.66 1.66"/>
+                    <geom type="mesh" mesh="arm5"/>
+
+                    <body name="arm_seg6_copy" pos="0 -0.1575 -0.00023266" quat="0.707 0.707 0 0">
+                    <joint name="arm_joint6_copy" axis="0 0 1" range="-1.83 1.83"/>
+                    <geom type="mesh" mesh="arm6"/>
+
+                    <!-- grippers -->
+                    <body name="gripper1_copy" pos="-0.014 0.011914 0.003125" quat="0.5 0.5 -0.5 0.5">
+                        <joint name="gripper1_copy" type="slide" axis="0 0 1" range="0 0.03"/>
+                        <geom type="mesh" mesh="gripper1"/>
+                    </body>
+
+                    <body name="gripper2_copy" pos="0.014 -0.011914 0.003125" quat="-0.5 0.5 0.5 0.5">
+                        <joint name="gripper2_copy" type="slide" axis="0 0 1" range="0 0.03"/>
+                        <geom type="mesh" mesh="gripper2"/>
+                    </body>
+
+                    </body>
+                </body>
+                </body>
+            </body>
+            </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+  <equality>
+    <weld name="dual_arm_weld" body1="disk" body2="gripper1_copy" solimp="0.9 0.95 0.001" solref="0.02 1"/>
+  </equality>
+  <actuator>
+    <!-- steering -->
+    <position name="steer_fl" joint="steer_fl" kp="200"/>
+    <position name="steer_fr" joint="steer_fr" kp="200"/>
+    <position name="steer_rl" joint="steer_rl" kp="200"/>
+    <position name="steer_rr" joint="steer_rr" kp="200"/>
+    <position name="steer_fl_copy" joint="steer_fl_copy" kp="200"/>
+    <position name="steer_fr_copy" joint="steer_fr_copy" kp="200"/>
+    <position name="steer_rl_copy" joint="steer_rl_copy" kp="200"/>
+    <position name="steer_rr_copy" joint="steer_rr_copy" kp="200"/>
+    <!-- wheels -->
+    <velocity name="wheel_fl" joint="wheel_fl" kv="10"/>
+    <velocity name="wheel_fr" joint="wheel_fr" kv="10"/>
+    <velocity name="wheel_rl" joint="wheel_rl" kv="10"/>
+    <velocity name="wheel_rr" joint="wheel_rr" kv="10"/>
+    <velocity name="wheel_fl_copy" joint="wheel_fl_copy" kv="10"/>
+    <velocity name="wheel_fr_copy" joint="wheel_fr_copy" kv="10"/>
+    <velocity name="wheel_rl_copy" joint="wheel_rl_copy" kv="10"/>
+    <velocity name="wheel_rr_copy" joint="wheel_rr_copy" kv="10"/>
+    <!-- arm -->
+    <position name="arm_joint1" joint="arm_joint1" kp="40"/>
+    <position name="arm_joint2" joint="arm_joint2" kp="40"/>
+    <position name="arm_joint3" joint="arm_joint3" kp="40"/>
+    <position name="arm_joint4" joint="arm_joint4" kp="40"/>
+    <position name="arm_joint5" joint="arm_joint5" kp="40"/>
+    <position name="arm_joint6" joint="arm_joint6" kp="40"/>
+    <position name="arm_joint1_copy" joint="arm_joint1_copy" kp="40"/>
+    <position name="arm_joint2_copy" joint="arm_joint2_copy" kp="40"/>
+    <position name="arm_joint3_copy" joint="arm_joint3_copy" kp="40"/>
+    <position name="arm_joint4_copy" joint="arm_joint4_copy" kp="40"/>
+    <position name="arm_joint5_copy" joint="arm_joint5_copy" kp="40"/>
+    <position name="arm_joint6_copy" joint="arm_joint6_copy" kp="40"/>
+    <!-- gripper -->
+    <position name="gripper1" joint="gripper1" kp="200"/>
+    <position name="gripper2" joint="gripper2" kp="200"/>
+    <position name="gripper1_copy" joint="gripper1_copy" kp="200"/>
+    <position name="gripper2_copy" joint="gripper2_copy" kp="200"/>
+  </actuator>
+</mujoco>
