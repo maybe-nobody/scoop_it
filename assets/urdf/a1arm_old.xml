@@ -1,0 +1,176 @@
+<mujoco model="ultra_dense_net">
+    <compiler meshdir="/home/zwc/scoop_it2/assets/urdf/meshes" balanceinertia="true"/>
+    <option timestep="0.002" integrator="RK4">
+        <flag contact="enable"/>
+    </option>
+
+    <asset>
+        <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>
+        <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3" markrgb="0.8 0.8 0.8" width="300" height="300"/>
+        <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2"/>
+    </asset>
+
+    <worldbody>
+        <light pos="0 0 3" dir="0 0 -1" directional="true"/>
+        <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
+
+        <body name="b0_0" pos="-0.30 -0.30 0.6"><geom type="sphere" size="0.008" rgba="1 0 0 1"/><site name="s0_0"/></body>
+        <body name="b0_1" pos="-0.24 -0.30 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s0_1"/></body>
+        <body name="b0_2" pos="-0.18 -0.30 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s0_2"/></body>
+        <body name="b0_3" pos="-0.12 -0.30 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s0_3"/></body>
+        <body name="b0_4" pos="-0.06 -0.30 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s0_4"/></body>
+        <body name="b0_5" pos="0.00  -0.30 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s0_5"/></body>
+        <body name="b0_6" pos="0.06  -0.30 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s0_6"/></body>
+        <body name="b0_7" pos="0.12  -0.30 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s0_7"/></body>
+        <body name="b0_8" pos="0.18  -0.30 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s0_8"/></body>
+        <body name="b0_9" pos="0.24  -0.30 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s0_9"/></body>
+        <body name="b0_10" pos="0.30 -0.30 0.6"><geom type="sphere" size="0.008" rgba="1 0 0 1"/><site name="s0_10"/></body>
+
+        <body name="b1_0" pos="-0.30 -0.24 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s1_0"/></body>
+        <body name="b1_1" pos="-0.24 -0.24 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s1_1"/></body>
+        <body name="b1_2" pos="-0.18 -0.24 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s1_2"/></body>
+        <body name="b1_3" pos="-0.12 -0.24 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s1_3"/></body>
+        <body name="b1_4" pos="-0.06 -0.24 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s1_4"/></body>
+        <body name="b1_5" pos="0.00  -0.24 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s1_5"/></body>
+        <body name="b1_6" pos="0.06  -0.24 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s1_6"/></body>
+        <body name="b1_7" pos="0.12  -0.24 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s1_7"/></body>
+        <body name="b1_8" pos="0.18  -0.24 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s1_8"/></body>
+        <body name="b1_9" pos="0.24  -0.24 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s1_9"/></body>
+        <body name="b1_10" pos="0.30 -0.24 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s1_10"/></body>
+
+        <body name="b2_0" pos="-0.30 -0.18 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s2_0"/></body>
+        <body name="b2_1" pos="-0.24 -0.18 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s2_1"/></body>
+        <body name="b2_2" pos="-0.18 -0.18 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s2_2"/></body>
+        <body name="b2_3" pos="-0.12 -0.18 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s2_3"/></body>
+        <body name="b2_4" pos="-0.06 -0.18 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s2_4"/></body>
+        <body name="b2_5" pos="0.00  -0.18 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s2_5"/></body>
+        <body name="b2_6" pos="0.06  -0.18 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s2_6"/></body>
+        <body name="b2_7" pos="0.12  -0.18 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s2_7"/></body>
+        <body name="b2_8" pos="0.18  -0.18 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s2_8"/></body>
+        <body name="b2_9" pos="0.24 -0.18 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s2_9"/></body>
+        <body name="b2_10" pos="0.30 -0.18 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s2_10"/></body>
+
+        <body name="b3_0" pos="-0.30 -0.12 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s3_0"/></body>
+        <body name="b3_1" pos="-0.24 -0.12 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s3_1"/></body>
+        <body name="b3_2" pos="-0.18 -0.12 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s3_2"/></body>
+        <body name="b3_3" pos="-0.12 -0.12 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s3_3"/></body>
+        <body name="b3_4" pos="-0.06 -0.12 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s3_4"/></body>
+        <body name="b3_5" pos="0.00  -0.12 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s3_5"/></body>
+        <body name="b3_6" pos="0.06  -0.12 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s3_6"/></body>
+        <body name="b3_7" pos="0.12  -0.12 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s3_7"/></body>
+        <body name="b3_8" pos="0.18  -0.12 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s3_8"/></body>
+        <body name="b3_9" pos="0.24 -0.12 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s3_9"/></body>
+        <body name="b3_10" pos="0.30 -0.12 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s3_10"/></body>
+
+        <body name="b4_0" pos="-0.30 -0.06 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s4_0"/></body>
+        <body name="b4_1" pos="-0.24 -0.06 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s4_1"/></body>
+        <body name="b4_2" pos="-0.18 -0.06 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s4_2"/></body>
+        <body name="b4_3" pos="-0.12 -0.06 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s4_3"/></body>
+        <body name="b4_4" pos="-0.06 -0.06 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s4_4"/></body>
+        <body name="b4_5" pos="0.00  -0.06 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s4_5"/></body>
+        <body name="b4_6" pos="0.06  -0.06 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s4_6"/></body>
+        <body name="b4_7" pos="0.12  -0.06 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s4_7"/></body>
+        <body name="b4_8" pos="0.18  -0.06 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s4_8"/></body>
+        <body name="b4_9" pos="0.24 -0.06 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s4_9"/></body>
+        <body name="b4_10" pos="0.30 -0.06 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s4_10"/></body>
+
+        <body name="b5_0" pos="-0.30 0.00 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s5_0"/></body>
+        <body name="b5_1" pos="-0.24 0.00 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s5_1"/></body>
+        <body name="b5_2" pos="-0.18 0.00 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s5_2"/></body>
+        <body name="b5_3" pos="-0.12 0.00 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s5_3"/></body>
+        <body name="b5_4" pos="-0.06 0.00 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s5_4"/></body>
+        <body name="b5_5" pos="0.00  0.00 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s5_5"/></body>
+        <body name="b5_6" pos="0.06  0.00 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s5_6"/></body>
+        <body name="b5_7" pos="0.12  0.00 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s5_7"/></body>
+        <body name="b5_8" pos="0.18  0.00 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s5_8"/></body>
+        <body name="b5_9" pos="0.24 0.00 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s5_9"/></body>
+        <body name="b5_10" pos="0.30 0.00 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s5_10"/></body>
+
+        <body name="b6_0" pos="-0.30 0.06 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s6_0"/></body>
+        <body name="b6_1" pos="-0.24 0.06 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s6_1"/></body>
+        <body name="b6_2" pos="-0.18 0.06 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s6_2"/></body>
+        <body name="b6_3" pos="-0.12 0.06 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s6_3"/></body>
+        <body name="b6_4" pos="-0.06 0.06 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s6_4"/></body>
+        <body name="b6_5" pos="0.00  0.06 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s6_5"/></body>
+        <body name="b6_6" pos="0.06  0.06 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s6_6"/></body>
+        <body name="b6_7" pos="0.12  0.06 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s6_7"/></body>
+        <body name="b6_8" pos="0.18  0.06 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s6_8"/></body>
+        <body name="b6_9" pos="0.24 0.06 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s6_9"/></body>
+        <body name="b6_10" pos="0.30 0.06 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s6_10"/></body>
+
+        <body name="b7_0" pos="-0.30 0.12 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s7_0"/></body>
+        <body name="b7_1" pos="-0.24 0.12 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s7_1"/></body>
+        <body name="b7_2" pos="-0.18 0.12 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s7_2"/></body>
+        <body name="b7_3" pos="-0.12 0.12 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s7_3"/></body>
+        <body name="b7_4" pos="-0.06 0.12 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s7_4"/></body>
+        <body name="b7_5" pos="0.00  0.12 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s7_5"/></body>
+        <body name="b7_6" pos="0.06  0.12 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s7_6"/></body>
+        <body name="b7_7" pos="0.12  0.12 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s7_7"/></body>
+        <body name="b7_8" pos="0.18  0.12 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s7_8"/></body>
+        <body name="b7_9" pos="0.24 0.12 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s7_9"/></body>
+        <body name="b7_10" pos="0.30 0.12 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s7_10"/></body>
+
+        <body name="b8_0" pos="-0.30 0.18 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s8_0"/></body>
+        <body name="b8_1" pos="-0.24 0.18 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s8_1"/></body>
+        <body name="b8_2" pos="-0.18 0.18 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s8_2"/></body>
+        <body name="b8_3" pos="-0.12 0.18 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s8_3"/></body>
+        <body name="b8_4" pos="-0.06 0.18 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s8_4"/></body>
+        <body name="b8_5" pos="0.00  0.18 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s8_5"/></body>
+        <body name="b8_6" pos="0.06  0.18 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s8_6"/></body>
+        <body name="b8_7" pos="0.12  0.18 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s8_7"/></body>
+        <body name="b8_8" pos="0.18  0.18 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s8_8"/></body>
+        <body name="b8_9" pos="0.24 0.18 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s8_9"/></body>
+        <body name="b8_10" pos="0.30 0.18 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s8_10"/></body>
+
+        <body name="b9_0" pos="-0.30 0.24 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s9_0"/></body>
+        <body name="b9_1" pos="-0.24 0.24 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s9_1"/></body>
+        <body name="b9_2" pos="-0.18 0.24 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s9_2"/></body>
+        <body name="b9_3" pos="-0.12 0.24 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s9_3"/></body>
+        <body name="b9_4" pos="-0.06 0.24 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s9_4"/></body>
+        <body name="b9_5" pos="0.00  0.24 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s9_5"/></body>
+        <body name="b9_6" pos="0.06  0.24 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s9_6"/></body>
+        <body name="b9_7" pos="0.12  0.24 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s9_7"/></body>
+        <body name="b9_8" pos="0.18  0.24 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s9_8"/></body>
+        <body name="b9_9" pos="0.24 0.24 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s9_9"/></body>
+        <body name="b9_10" pos="0.30 0.24 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s9_10"/></body>
+
+        <body name="b10_0" pos="-0.30 0.30 0.6"><geom type="sphere" size="0.008" rgba="1 0 0 1"/><site name="s10_0"/></body>
+        <body name="b10_1" pos="-0.24 0.30 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s10_1"/></body>
+        <body name="b10_2" pos="-0.18 0.30 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s10_2"/></body>
+        <body name="b10_3" pos="-0.12 0.30 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s10_3"/></body>
+        <body name="b10_4" pos="-0.06 0.30 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s10_4"/></body>
+        <body name="b10_5" pos="0.00  0.30 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s10_5"/></body>
+        <body name="b10_6" pos="0.06  0.30 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s10_6"/></body>
+        <body name="b10_7" pos="0.12  0.30 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s10_7"/></body>
+        <body name="b10_8" pos="0.18  0.30 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s10_8"/></body>
+        <body name="b10_9" pos="0.24 0.30 0.6"><joint type="ball"/><geom type="sphere" size="0.005"/><site name="s10_9"/></body>
+        <body name="b10_10" pos="0.30 0.30 0.6"><geom type="sphere" size="0.008" rgba="1 0 0 1"/><site name="s10_10"/></body>
+
+    </worldbody>
+
+    <tendon>
+        <spatial name="h0" stiffness="80" damping="3"><site site="s0_0"/><site site="s0_1"/><site site="s0_2"/><site site="s0_3"/><site site="s0_4"/><site site="s0_5"/><site site="s0_6"/><site site="s0_7"/><site site="s0_8"/><site site="s0_9"/><site site="s0_10"/></spatial>
+        <spatial name="h1" stiffness="80" damping="3"><site site="s1_0"/><site site="s1_1"/><site site="s1_2"/><site site="s1_3"/><site site="s1_4"/><site site="s1_5"/><site site="s1_6"/><site site="s1_7"/><site site="s1_8"/><site site="s1_9"/><site site="s1_10"/></spatial>
+        <spatial name="h2" stiffness="80" damping="3"><site site="s2_0"/><site site="s2_1"/><site site="s2_2"/><site site="s2_3"/><site site="s2_4"/><site site="s2_5"/><site site="s2_6"/><site site="s2_7"/><site site="s2_8"/><site site="s2_9"/><site site="s2_10"/></spatial>
+        <spatial name="h3" stiffness="80" damping="3"><site site="s3_0"/><site site="s3_1"/><site site="s3_2"/><site site="s3_3"/><site site="s3_4"/><site site="s3_5"/><site site="s3_6"/><site site="s3_7"/><site site="s3_8"/><site site="s3_9"/><site site="s3_10"/></spatial>
+        <spatial name="h4" stiffness="80" damping="3"><site site="s4_0"/><site site="s4_1"/><site site="s4_2"/><site site="s4_3"/><site site="s4_4"/><site site="s4_5"/><site site="s4_6"/><site site="s4_7"/><site site="s4_8"/><site site="s4_9"/><site site="s4_10"/></spatial>
+        <spatial name="h5" stiffness="80" damping="3"><site site="s5_0"/><site site="s5_1"/><site site="s5_2"/><site site="s5_3"/><site site="s5_4"/><site site="s5_5"/><site site="s5_6"/><site site="s5_7"/><site site="s5_8"/><site site="s5_9"/><site site="s5_10"/></spatial>
+        <spatial name="h6" stiffness="80" damping="3"><site site="s6_0"/><site site="s6_1"/><site site="s6_2"/><site site="s6_3"/><site site="s6_4"/><site site="s6_5"/><site site="s6_6"/><site site="s6_7"/><site site="s6_8"/><site site="s6_9"/><site site="s6_10"/></spatial>
+        <spatial name="h7" stiffness="80" damping="3"><site site="s7_0"/><site site="s7_1"/><site site="s7_2"/><site site="s7_3"/><site site="s7_4"/><site site="s7_5"/><site site="s7_6"/><site site="s7_7"/><site site="s7_8"/><site site="s7_9"/><site site="s7_10"/></spatial>
+        <spatial name="h8" stiffness="80" damping="3"><site site="s8_0"/><site site="s8_1"/><site site="s8_2"/><site site="s8_3"/><site site="s8_4"/><site site="s8_5"/><site site="s8_6"/><site site="s8_7"/><site site="s8_8"/><site site="s8_9"/><site site="s8_10"/></spatial>
+        <spatial name="h9" stiffness="80" damping="3"><site site="s9_0"/><site site="s9_1"/><site site="s9_2"/><site site="s9_3"/><site site="s9_4"/><site site="s9_5"/><site site="s9_6"/><site site="s9_7"/><site site="s9_8"/><site site="s9_9"/><site site="s9_10"/></spatial>
+        <spatial name="h10" stiffness="80" damping="3"><site site="s10_0"/><site site="s10_1"/><site site="s10_2"/><site site="s10_3"/><site site="s10_4"/><site site="s10_5"/><site site="s10_6"/><site site="s10_7"/><site site="s10_8"/><site site="s10_9"/><site site="s10_10"/></spatial>
+
+        <spatial name="v0" stiffness="80" damping="3"><site site="s0_0"/><site site="s1_0"/><site site="s2_0"/><site site="s3_0"/><site site="s4_0"/><site site="s5_0"/><site site="s6_0"/><site site="s7_0"/><site site="s8_0"/><site site="s9_0"/><site site="s10_0"/></spatial>
+        <spatial name="v1" stiffness="80" damping="3"><site site="s0_1"/><site site="s1_1"/><site site="s2_1"/><site site="s3_1"/><site site="s4_1"/><site site="s5_1"/><site site="s6_1"/><site site="s7_1"/><site site="s8_1"/><site site="s9_1"/><site site="s10_1"/></spatial>
+        <spatial name="v2" stiffness="80" damping="3"><site site="s0_2"/><site site="s1_2"/><site site="s2_2"/><site site="s3_2"/><site site="s4_2"/><site site="s5_2"/><site site="s6_2"/><site site="s7_2"/><site site="s8_2"/><site site="s9_2"/><site site="s10_2"/></spatial>
+        <spatial name="v3" stiffness="80" damping="3"><site site="s0_3"/><site site="s1_3"/><site site="s2_3"/><site site="s3_3"/><site site="s4_3"/><site site="s5_3"/><site site="s6_3"/><site site="s7_3"/><site site="s8_3"/><site site="s9_3"/><site site="s10_3"/></spatial>
+        <spatial name="v4" stiffness="80" damping="3"><site site="s0_4"/><site site="s1_4"/><site site="s2_4"/><site site="s3_4"/><site site="s4_4"/><site site="s5_4"/><site site="s6_4"/><site site="s7_4"/><site site="s8_4"/><site site="s9_4"/><site site="s10_4"/></spatial>
+        <spatial name="v5" stiffness="80" damping="3"><site site="s0_5"/><site site="s1_5"/><site site="s2_5"/><site site="s3_5"/><site site="s4_5"/><site site="s5_5"/><site site="s6_5"/><site site="s7_5"/><site site="s8_5"/><site site="s9_5"/><site site="s10_5"/></spatial>
+        <spatial name="v6" stiffness="80" damping="3"><site site="s0_6"/><site site="s1_6"/><site site="s2_6"/><site site="s3_6"/><site site="s4_6"/><site site="s5_6"/><site site="s6_6"/><site site="s7_6"/><site site="s8_6"/><site site="s9_6"/><site site="s10_6"/></spatial>
+        <spatial name="v7" stiffness="80" damping="3"><site site="s0_7"/><site site="s1_7"/><site site="s2_7"/><site site="s3_7"/><site site="s4_7"/><site site="s5_7"/><site site="s6_7"/><site site="s7_7"/><site site="s8_7"/><site site="s9_7"/><site site="s10_7"/></spatial>
+        <spatial name="v8" stiffness="80" damping="3"><site site="s0_8"/><site site="s1_8"/><site site="s2_8"/><site site="s3_8"/><site site="s4_8"/><site site="s5_8"/><site site="s6_8"/><site site="s7_8"/><site site="s8_8"/><site site="s9_8"/><site site="s10_8"/></spatial>
+        <spatial name="v9" stiffness="80" damping="3"><site site="s0_9"/><site site="s1_9"/><site site="s2_9"/><site site="s3_9"/><site site="s4_9"/><site site="s5_9"/><site site="s6_9"/><site site="s7_9"/><site site="s8_9"/><site site="s9_9"/><site site="s10_9"/></spatial>
+        <spatial name="v10" stiffness="80" damping="3"><site site="s0_10"/><site site="s10_10"/><site site="s2_10"/><site site="s3_10"/><site site="s4_10"/><site site="s5_10"/><site site="s6_10"/><site site="s7_10"/><site site="s8_10"/><site site="s9_10"/><site site="s10_10"/></spatial>
+    </tendon>
+</mujoco>

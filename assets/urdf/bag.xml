@@ -1,0 +1,154 @@
+<mujoco model="bars_cable_basket_final_fixed">
+    <compiler autolimits="true"/>
+    <option gravity="0 0 -9.81" timestep="0.002"/>
+
+    <worldbody>
+        <light directional="true" diffuse=".8 .8 .8" specular=".2 .2 .2" pos="0 0 5" dir="0 0 -1"/>
+        <geom name="floor" type="plane" size="2 2 .05" rgba=".8 .9 .8 1"/>
+
+        <body name="bar_left" pos="-0.175 0 0.8">
+            <joint name="move_left_x" type="slide" axis="1 0 0" damping="20"/>
+            <geom type="capsule" fromto="0 -0.21 0  0 0.21 0" size="0.012" rgba="0.7 0.3 0.3 1"/>
+        </body>
+
+        <body name="bar_right" pos="0.175 0 0.8">
+            <joint name="move_right_x" type="slide" axis="1 0 0" damping="20"/>
+            <geom type="capsule" fromto="0 -0.21 0  0 0.21 0" size="0.012" rgba="0.3 0.3 0.7 1"/>
+        </body>
+
+        <body name="basket" pos="0 0 0.55">
+            <freejoint/> 
+            <geom name="basket_bottom" type="box" size="0.15 0.175 0.01" rgba="0.5 0.5 0.5 1"/>
+        </body>
+
+        <composite type="cable" count="8 1 1" initial="line">
+            <joint kind="main" stiffness="0.1" damping="0.05"/>
+            <geom type="capsule" size="0.006 0.01" rgba="0.8 0.8 0.8 1" mass="0.001"/>
+        </composite>
+
+        <composite type="cable" count="8 1 1" initial="line" offset="0 0.1 0">
+            <joint kind="main" stiffness="0.1" damping="0.05"/>
+            <geom type="capsule" size="0.006 0.01" rgba="0.8 0.8 0.8 1" mass="0.001"/>
+        </composite>
+
+        <composite type="cable" count="8 1 1" initial="line" offset="0 0.2 0">
+            <joint kind="main" stiffness="0.1" damping="0.05"/>
+            <geom type="capsule" size="0.006 0.01" rgba="0.8 0.8 0.8 1" mass="0.001"/>
+        </composite>
+
+        <composite type="cable" count="8 1 1" initial="line" offset="0 0.3 0">
+            <joint kind="main" stiffness="0.1" damping="0.05"/>
+            <geom type="capsule" size="0.006 0.01" rgba="0.8 0.8 0.8 1" mass="0.001"/>
+        </composite>
+
+    </worldbody>
+
+    <equality>
+        <weld body1="B0" body2="bar_left"  relpose="0 0.175 0 1 0 0 0"/>
+        <weld body1="B7" body2="basket"    relpose="-0.15 0.175 0.01 1 0 0 0"/>
+
+        <weld body1="B8" body2="bar_left"  relpose="0 -0.175 0 1 0 0 0"/>
+        <weld body1="B15" body2="basket"   relpose="-0.15 -0.175 0.01 1 0 0 0"/>
+
+        <weld body1="B16" body2="bar_right" relpose="0 0.175 0 1 0 0 0"/>
+        <weld body1="B23" body2="basket"    relpose="0.15 0.175 0.01 1 0 0 0"/>
+
+        <weld body1="B24" body2="bar_right" relpose="0 -0.175 0 1 0 0 0"/>
+        <weld body1="B31" body2="basket"    relpose="0.15 -0.175 0.01 1 0 0 0"/>
+    </equality>
+
+    <actuator>
+        <position name="act_left"  joint="move_left_x"  kp="2000" ctrlrange="-0.5 0.5" forcerange="-150 150"/>
+        <position name="act_right" joint="move_right_x" kp="2000" ctrlrange="-0.5 0.5" forcerange="-150 150"/>
+    </actuator>
+</mujoco>
+<!-- <mujoco model="four_point_fixed_pocket">
+    <compiler autolimits="true"/>
+    <option gravity="0 0 -9.81" timestep="0.002"/>
+
+    <worldbody>
+        <light directional="true" diffuse=".8 .8 .8" specular=".2 .2 .2" pos="0 0 5" dir="0 0 -1"/>
+        <geom name="floor" type="plane" size="2 2 .05" rgba=".8 .9 .8 1"/>
+
+        <body name="frame" pos="0 0 0.5">
+            <joint name="move_x" type="slide" axis="1 0 0" damping="20"/>
+            <joint name="move_y" type="slide" axis="0 1 0" damping="20"/>
+            <joint name="move_z" type="slide" axis="0 0 1" damping="20"/>
+
+            <geom type="capsule" fromto="-0.15 -0.21 0.05  -0.15 0.21 0.05" size="0.012" rgba="0.5 0.5 0.5 1"/>
+            <geom type="capsule" fromto=" 0.15 -0.21 0.05   0.15 0.21 0.05" size="0.012" rgba="0.5 0.5 0.5 1"/>
+
+            <composite type="grid" count="15 15 1" spacing="0.025" offset="0 0 0.05">
+                <pin coord="0 0"/>
+                <pin coord="14 0"/>
+                <pin coord="0 14"/>
+                <pin coord="14 14"/>
+                
+                <skin rgba="0.2 0.6 0.4 0.8" inflate="0.002" texcoord="true"/>
+                
+                <joint kind="main" damping="0.1"/>
+                
+                <geom size="0.005" rgba="0.2 0.6 0.4 0.2" mass="0.0008" solref="0.02 1"/> 
+            </composite>
+        </body>
+
+        <body name="test_ball" pos="0 0 0.8">
+            <joint type="free"/>
+            <geom type="sphere" size="0.04" rgba="1 0.5 0 1" mass="0.1"/>
+        </body>
+    </worldbody>
+
+    <actuator>
+        <position name="act_x" joint="move_x" kp="2000" ctrlrange="-1 1"/>
+        <position name="act_y" joint="move_y" kp="2000" ctrlrange="-1 1"/>
+        <position name="act_z" joint="move_z" kp="2000" ctrlrange="-0.5 1"/>
+    </actuator>
+</mujoco> -->
+<!-- <mujoco model="independent_bars_connected_pocket">
+    <compiler autolimits="true"/>
+    <option gravity="0 0 -9.81" timestep="0.002"/>
+
+    <worldbody>
+        <light directional="true" diffuse=".8 .8 .8" specular=".2 .2 .2" pos="0 0 5" dir="0 0 -1"/>
+        <geom name="floor" type="plane" size="2 2 .05" rgba=".8 .9 .8 1"/>
+
+        <body name="bar_left" pos="-0.175 0 0.55">
+            <joint name="move_left_x" type="slide" axis="1 0 0" damping="20"/>
+            <geom type="capsule" fromto="0 -0.21 0  0 0.21 0" size="0.012" rgba="0.7 0.3 0.3 1"/>
+            <site name="hook_top_left" pos="0 0.175 0" size="0.01"/>
+            <site name="hook_bottom_left" pos="0 -0.175 0" size="0.01"/>
+        </body>
+
+        <body name="bar_right" pos="0.175 0 0.55">
+            <joint name="move_right_x" type="slide" axis="1 0 0" damping="20"/>
+            <geom type="capsule" fromto="0 -0.21 0  0 0.21 0" size="0.012" rgba="0.3 0.3 0.7 1"/>
+            <site name="hook_top_right" pos="0 0.175 0" size="0.01"/>
+            <site name="hook_bottom_right" pos="0 -0.175 0" size="0.01"/>
+        </body>
+
+        <body name="cloth_container" pos="0 0 0.55">
+            <composite type="grid" count="15 15 1" spacing="0.025" offset="0 0 0">
+                <skin rgba="0.2 0.6 0.4 0.8" inflate="0.002" texcoord="true"/>
+                <joint kind="main" damping="0.1"/>
+                <geom size="0.005" rgba="0.2 0.6 0.4 0.2" mass="0.0008"/> 
+            </composite>
+        </body>
+
+        <body name="test_ball" pos="0 0 0.8">
+            <joint type="free"/>
+            <geom type="sphere" size="0.04" rgba="1 0.5 0 1" mass="0.1"/>
+        </body>
+    </worldbody>
+
+    <equality>
+        <weld body1="B0_0"   body2="bar_left"  relpose="0 -0.175 0 1 0 0 0"/>
+        <weld body1="B0_14"  body2="bar_left"  relpose="0 0.175 0 1 0 0 0"/>
+        <weld body1="B14_0"  body2="bar_right" relpose="0 -0.175 0 1 0 0 0"/>
+        <weld body1="B14_14" body2="bar_right" relpose="0 0.175 0 1 0 0 0"/>
+    </equality>
+
+    <actuator>
+        <position name="act_left_x" joint="move_left_x" kp="2000" ctrlrange="-0.5 0.5"/>
+        <position name="act_right_x" joint="move_right_x" kp="2000" ctrlrange="-0.5 0.5"/>
+    </actuator>
+</mujoco> -->

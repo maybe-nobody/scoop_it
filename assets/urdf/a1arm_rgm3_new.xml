@@ -1,0 +1,202 @@
+<mujoco model="a1arm_rgm3">
+    <!-- 编译器选项 -->
+    <compiler angle="radian" meshdir="new_meshes" autolimits="true"/>
+    <option integrator="RK4" timestep="0.001"/>
+    <size njmax="500" nconmax="100"/>
+
+    <!-- 资产：网格 + 材质 -->
+    <asset>
+        <!-- 底盘 -->
+        <mesh name="rgm3_base_link" file="rgm3_base_link.STL"/>
+        <mesh name="rgm3_tires_link" file="rgm3_tires_link.STL"/>
+        <mesh name="aluminum_profiles" file="aluminum_profiles.STL"/>
+
+        <!-- 相机 -->
+        <mesh name="rear_top_camera_connector" file="rear_top_camera_connector.STL"/>
+        <mesh name="rear_top_camera" file="rear_top_camera.STL"/>
+        <mesh name="front_camera_connector" file="front_camera_connector.STL"/>
+        <mesh name="front_camera" file="front_camera.STL"/>
+        <mesh name="right_camera_connector" file="right_camera_connector.STL"/>
+        <mesh name="right_camera" file="right_camera.STL"/>
+        <mesh name="left_camera_connector" file="left_camera_connector.STL"/>
+        <mesh name="left_camera" file="left_camera.STL"/>
+        <mesh name="wrist_camera_connector" file="wrist_camera_connector.STL"/>
+        <mesh name="wrist_camera" file="wrist_camera.STL"/>
+
+        <!-- 机械臂 -->
+        <mesh name="arm_base" file="arm_base.STL"/>
+        <mesh name="arm_seg1" file="arm_seg1.STL"/>
+        <mesh name="arm_seg2" file="arm_seg2.STL"/>
+        <mesh name="arm_seg3" file="arm_seg3.STL"/>
+        <mesh name="arm_seg4" file="arm_seg4.STL"/>
+        <mesh name="arm_seg5" file="arm_seg5.STL"/>
+        <mesh name="arm_seg6" file="arm_seg6.STL"/>
+
+        <!-- 夹爪 -->
+        <mesh name="gripper1" file="gripper1.STL"/>
+        <mesh name="gripper2" file="gripper2.STL"/>
+
+        <!-- 颜色 -->
+        <material name="mat_base" rgba="0.32 0.32 0.34 1"/>
+        <material name="mat_tires" rgba="0.102 0.098 0.082 1"/>
+        <material name="mat_alu" rgba="0.93 0.92 0.93 1"/>
+        <material name="mat_arm_base" rgba="0.168 0.164 0.17 1"/>
+        <material name="mat_arm_seg1" rgba="0.1 0.1 0.1 1"/>
+        <material name="mat_arm_seg2" rgba="0.55 0.54 0.53 1"/>
+        <material name="mat_arm_seg3" rgba="0.45 0.44 0.44 1"/>
+        <material name="mat_arm_seg4" rgba="0.15 0.16 0.14 1"/>
+        <material name="mat_arm_seg5" rgba="0.35 0.33 0.34 1"/>
+        <material name="mat_arm_seg6" rgba="0.1 0.1 0.1 1"/>
+        <material name="mat_gripper" rgba="0.2 0.2 0.2 1"/>
+        <material name="mat_cam" rgba="0.83 0.82 0.82 1"/>
+        <material name="mat_conn" rgba="1 1 1 1"/>
+    </asset>
+
+    <!-- 世界 -->
+    <worldbody>
+        <light pos="0 0 2" dir="0 0 -1" diffuse="0.8 0.8 0.8"/>
+        <geom name="floor" type="plane" size="0 0 0.05" rgba="0.8 0.8 0.8 1"/>
+
+        <!-- 根浮动基座（URDF 中通过 3 个虚拟关节实现平面移动+旋转） -->
+        <body name="rgm3_base_link" pos="0 0 0">
+            <inertial pos="-0.0082031 0.00042253 0.23269" mass="40.211"
+                      diaginertia="0.6072 0.34693 0.7893"/>
+            <freejoint name="root"/>
+            <geom type="mesh" mesh="rgm3_base_link" material="mat_base"/>
+            <geom type="mesh" mesh="rgm3_tires_link" material="mat_tires"/>
+
+            <!-- 铝型材 -->
+            <body name="aluminum_profiles" pos="0 0 0">
+                <inertial pos="-0.18978 0.00011717 0.6976" mass="3.259"
+                          diaginertia="0.14298 0.13285 0.011877"/>
+                <geom type="mesh" mesh="aluminum_profiles" material="mat_alu"/>
+
+                <!-- 相机支架与相机 -->
+                <body name="rear_top_camera_connector" pos="-0.3025 0 1.4747">
+                    <inertial pos="-0.0031079 0 -0.007179" mass="0.032864"
+                              diaginertia="1.85e-5 2.15e-5 2.28e-5"/>
+                    <geom type="mesh" mesh="rear_top_camera_connector" material="mat_conn"/>
+                    <body name="rear_top_camera" pos="0.053263 0.0325 0.001557" quat="0 0 0 1">
+                        <inertial pos="-0.030921 0 -0.015277" mass="0.039073"
+                                  diaginertia="2.12e-6 2.23e-5 2.36e-5"/>
+                        <geom type="mesh" mesh="rear_top_camera" material="mat_cam"/>
+                    </body>
+                </body>
+
+                <body name="front_camera_connector" pos="0.270334 0.0325 0.49969" quat="0 0 0 1">
+                    <inertial pos="-0.0325 -0.0336 -0.04366" mass="0.0315"
+                              diaginertia="3.13e-5 1.62e-5 3.81e-5"/>
+                    <geom type="mesh" mesh="front_camera_connector" material="mat_conn"/>
+                    <body name="front_camera" pos="0 0 0">
+                        <inertial pos="-0.030921 0 -0.015277" mass="0.039073"
+                                  diaginertia="2.12e-6 2.23e-5 2.36e-5"/>
+                        <geom type="mesh" mesh="front_camera" material="mat_conn"/>
+                    </body>
+                </body>
+
+                <body name="right_camera_connector" pos="-0.00809 -0.24319 1.3879" quat="0 0 0 1">
+                    <inertial pos="-0.08098 -0.00379 -0.02371" mass="0.04246"
+                              diaginertia="1.07e-5 7.76e-5 7.43e-5"/>
+                    <geom type="mesh" mesh="right_camera_connector" material="mat_conn"/>
+                    <body name="right_camera" pos="0 0 0">
+                        <inertial pos="-0.03058 0.00457 -0.01528" mass="0.03907"
+                                  diaginertia="2.56e-6 2.18e-5 2.36e-5"/>
+                        <geom type="mesh" mesh="right_camera" material="mat_cam"/>
+                    </body>
+                </body>
+
+                <body name="left_camera_connector" pos="-0.00809 0.24319 1.3879" quat="0 0 0 1">
+                    <inertial pos="-0.08098 0.00379 -0.02371" mass="0.04246"
+                              diaginertia="1.07e-5 7.76e-5 7.43e-5"/>
+                    <geom type="mesh" mesh="left_camera_connector" material="mat_conn"/>
+                    <body name="left_camera" pos="0 0 0">
+                        <inertial pos="-0.03058 -0.00457 -0.01528" mass="0.03907"
+                                  diaginertia="2.56e-6 2.18e-5 2.36e-5"/>
+                        <geom type="mesh" mesh="left_camera" material="mat_cam"/>
+                    </body>
+                </body>
+
+                <!-- 机械臂 -->
+                <body name="arm_base" pos="0.1725 0 0.42568">
+                    <inertial pos="0.002377 -1.10e-6 0.040484" mass="0.11527"
+                              diaginertia="2.74e-4 2.58e-4 3.46e-4"/>
+                    <geom type="mesh" mesh="arm_base" material="mat_arm_base"/>
+                    <body name="arm_seg1" pos="0 0 0.078">
+                        <joint name="arm_joint1" axis="0 0 1" limited="true" range="-2.88 2.88"/>
+                        <inertial pos="-3.56e-5 -0.001486 0.06674" mass="0.40929"
+                                  diaginertia="3.09e-4 4.83e-4 2.99e-4"/>
+                        <geom type="mesh" mesh="arm_seg1" material="mat_arm_seg1"/>
+                        <body name="arm_seg2" pos="0 0 0.07" quat="0.7071 0 0 0.7071">
+                            <joint name="arm_joint2" axis="0 0 1" limited="true" range="0 3.14"/>
+                            <inertial pos="0.17311 0.018051 0.000185" mass="0.35351"
+                                      diaginertia="2.45e-4 1.58e-3 1.55e-3"/>
+                            <geom type="mesh" mesh="arm_seg2" material="mat_arm_seg2"/>
+                            <body name="arm_seg3" pos="0.34928 0.02 0" quat="0 0 0 1">
+                                <joint name="arm_joint3" axis="0 0 1" limited="true" range="-3.3 0"/>
+                                <inertial pos="0.0434 0.054752 0.000284" mass="0.21174"
+                                          diaginertia="8.19e-4 1.87e-4 8.38e-4"/>
+                                <geom type="mesh" mesh="arm_seg3" material="mat_arm_seg3"/>
+                                <body name="arm_seg4" pos="0.069884 0 0" quat="0.5 0.5 -0.5 0.5">
+                                    <joint name="arm_joint4" axis="0 0 1" limited="true" range="-2.88 2.88"/>
+                                    <inertial pos="-0.00135 -0.005 0.23437" mass="0.0599"
+                                              diaginertia="6.62e-5 7.06e-5 2.62e-5"/>
+                                    <geom type="mesh" mesh="arm_seg4" material="mat_arm_seg4"/>
+                                    <body name="arm_seg5" pos="0 0 0.27865" quat="0 0 1 0">
+                                        <joint name="arm_joint5" axis="0 0 1" limited="true" range="-1.65 1.65"/>
+                                        <inertial pos="6.85e-5 -0.05563 0.00388" mass="0.14224"
+                                                  diaginertia="7.78e-5 6.35e-5 7.59e-5"/>
+                                        <geom type="mesh" mesh="arm_seg5" material="mat_arm_seg5"/>
+                                        <body name="arm_seg6" pos="0 -0.1595 0" quat="0.7071 0 0 0.7071">
+                                            <joint name="arm_joint6" axis="0 0 1" limited="true" range="-2.88 2.88"/>
+                                            <inertial pos="0 0 -0.03777" mass="0.18274"
+                                                      diaginertia="1.17e-4 1.15e-4 7.42e-5"/>
+                                            <geom type="mesh" mesh="arm_seg6" material="mat_arm_seg6"/>
+
+                                            <!-- 夹爪 -->
+                                            <body name="gripper1" pos="0 0 0" quat="0 0.7071 0 0.7071">
+                                                <joint name="gripper1_axis" type="slide" axis="0 0 1" limited="true" range="0 0.03"/>
+                                                <inertial pos="0.0168 -0.0052 -0.0014" mass="0.0203"
+                                                          diaginertia="2.42e-6 6.64e-6 5.89e-6"/>
+                                                <geom type="mesh" mesh="gripper1" material="mat_gripper"/>
+                                            </body>
+                                            <body name="gripper2" pos="0 0 0" quat="0.7071 0 0 0.7071">
+                                                <joint name="gripper2_axis" type="slide" axis="0 0 1" limited="true" range="0 0.03"/>
+                                                <inertial pos="0.0168 -0.0052 -0.0014" mass="0.0203"
+                                                          diaginertia="2.42e-6 6.64e-6 5.89e-6"/>
+                                                <geom type="mesh" mesh="gripper2" material="mat_gripper"/>
+                                            </body>
+
+                                            <!-- 腕相机 -->
+                                            <body name="wrist_camera_connector" pos="0.035 0 -0.007" quat="0 -0.7071 0 0.7071">
+                                                <inertial pos="-0.0489 -0.0102 0.0255" mass="0.04396"
+                                                          diaginertia="4.71e-5 4.00e-5 3.65e-5"/>
+                                                <geom type="mesh" mesh="wrist_camera_connector" material="mat_conn"/>
+                                                <body name="wrist_camera" pos="-0.0281 0.002 0.0343" quat="0.5 0.5 -0.5 0.5">
+                                                    <inertial pos="-0.03092 0 -0.01528" mass="0.03907"
+                                                              diaginertia="2.12e-6 2.23e-5 2.36e-5"/>
+                                                    <geom type="mesh" mesh="wrist_camera" material="mat_cam"/>
+                                                </body>
+                                            </body>
+                                        </body>
+                                    </body>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+        </body>
+    </worldbody>
+
+    <!-- 执行器 -->
+    <actuator>
+        <motor name="arm_joint1" joint="arm_joint1" ctrlrange="-100 100"/>
+        <motor name="arm_joint2" joint="arm_joint2" ctrlrange="-100 100"/>
+        <motor name="arm_joint3" joint="arm_joint3" ctrlrange="-100 100"/>
+        <motor name="arm_joint4" joint="arm_joint4" ctrlrange="-100 100"/>
+        <motor name="arm_joint5" joint="arm_joint5" ctrlrange="-100 100"/>
+        <motor name="arm_joint6" joint="arm_joint6" ctrlrange="-100 100"/>
+        <motor name="gripper1" joint="gripper1_axis" ctrlrange="0 200"/>
+        <motor name="gripper2" joint="gripper2_axis" ctrlrange="0 200"/>
+    </actuator>
+</mujoco>
