@@ -1,5 +1,5 @@
 <mujoco model="xarm6_right">
-    <compiler angle="radian" meshdir="/home/zwc/scoop_it2/assets/urdf/" autolimits="true"/>
+    <compiler angle="radian" meshdir="/home/lsq/scoop_it/assets/urdf/" autolimits="true"/>
     <!-- <size njmax="500" nconmax="100" /> -->
     <option integrator="RK4"/>
     <asset>

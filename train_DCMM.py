@@ -61,9 +61,9 @@ def main(config: DictConfig):#类型注解，这里的config就是从上面的hy
         task = 'Catching'
     '''
     #print("config.num_envs: ", config.num_envs)
-    env = gym.make_vec(env_name, num_envs=int(config.num_envs), vectorization_mode="async",
+    env = gym.make_vec(env_name, num_envs=int(config.num_envs), vectorization_mode="sync",
                     task=task, camera_name=["top"],
-                    render_per_step=False, render_mode =None,#"rgb_array" None 训练的时候不渲染，加快速度，测试的时候要把渲染打开
+                    render_per_step=False, render_mode ="rgb_array",#"rgb_array" None 训练的时候不渲染，加快速度，测试的时候要把渲染打开
                     object_name = "object",
                     img_size = config.train.ppo.img_dim,
                     imshow_cam = config.imshow_cam, 
@@ -123,3 +123,5 @@ if __name__ == '__main__':
 #python3 train_DCMM.py test=False task=Tracking num_envs=
 #python3 train_DCMM.py test=True task=Catching_OneStage num_envs=1 checkpoint_catching= object_eval=True viewer=True imshow_cam=False
 #python3 train_DCMM.py test=False task=Catching_OneStage num_envs=$(number_of_CPUs)
+#反向传播为什么不对奖励进行反向传播而是对损失进行反向传播呢，因为奖励是环境给出来的，而且也通过了采样，没有办法进行求导
+#而损失虽然也是通过采样得到的，但是反向传播求导的其实是输出的概率，而且在actor损失里面ratio是概率，而后面的优势函数是具体的采样结果，相当于把这两个过程连接起来了。

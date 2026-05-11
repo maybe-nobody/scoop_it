@@ -1,5 +1,5 @@
 <mujoco model="ultra_dense_net">
-    <compiler meshdir="/home/zwc/scoop_it2/assets/urdf/meshes" balanceinertia="true"/>
+    <compiler meshdir="/home/lsq/scoop_it/assets/urdf/meshes" balanceinertia="true"/>
     <option timestep="0.002" integrator="RK4">
         <flag contact="enable"/>
     </option>

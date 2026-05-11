@@ -19,31 +19,31 @@
   </asset>
   <asset>
     <!-- chassis -->
-    <mesh name="chassis" file="/home/zwc/scoop_it2/assets/new_meshes/chassis_base.STL"/>
-    <mesh name="base_link" file="/home/zwc/scoop_it2/assets/new_meshes/base_link.STL"/>
+    <mesh name="chassis" file="/home/lsq/scoop_it/assets/urdf/chassis_base.STL"/>
+    <mesh name="base_link" file="/home/lsq/scoop_it/assets/urdf/base_link.STL"/>
 
     <!-- arm -->
-    <mesh name="arm1" file="/home/zwc/scoop_it2/assets/new_meshes/arm_seg1.STL"/>
-    <mesh name="arm2" file="/home/zwc/scoop_it2/assets/new_meshes/arm_seg2.STL"/>
-    <mesh name="arm3" file="/home/zwc/scoop_it2/assets/new_meshes/arm_seg3.STL"/>
-    <mesh name="arm4" file="/home/zwc/scoop_it2/assets/new_meshes/arm_seg4.STL"/>
-    <mesh name="arm5" file="/home/zwc/scoop_it2/assets/new_meshes/arm_seg5.STL"/>
-    <mesh name="arm6" file="/home/zwc/scoop_it2/assets/new_meshes/arm_seg6.STL"/>
+    <mesh name="arm1" file="/home/lsq/scoop_it/assets/urdf/arm_seg1.STL"/>
+    <mesh name="arm2" file="/home/lsq/scoop_it/assets/urdf/arm_seg2.STL"/>
+    <mesh name="arm3" file="/home/lsq/scoop_it/assets/urdf/arm_seg3.STL"/>
+    <mesh name="arm4" file="/home/lsq/scoop_it/assets/urdf/arm_seg4.STL"/>
+    <mesh name="arm5" file="/home/lsq/scoop_it/assets/urdf/arm_seg5.STL"/>
+    <mesh name="arm6" file="/home/lsq/scoop_it/assets/urdf/arm_seg6.STL"/>
 
     <!-- gripper -->
-    <mesh name="gripper1" file="/home/zwc/scoop_it2/assets/new_meshes/gripper1.STL"/>
-    <mesh name="gripper2" file="/home/zwc/scoop_it2/assets/new_meshes/gripper2.STL"/>
+    <mesh name="gripper1" file="/home/lsq/scoop_it/assets/urdf/gripper1.STL"/>
+    <mesh name="gripper2" file="/home/lsq/scoop_it/assets/urdf/gripper2.STL"/>
 
     <!-- wheels -->
-    <mesh name="steer_fl" file="/home/zwc/scoop_it2/assets/new_meshes/steer_fl.STL"/>
-    <mesh name="steer_fr" file="/home/zwc/scoop_it2/assets/new_meshes/steer_fr.STL"/>
-    <mesh name="steer_rl" file="/home/zwc/scoop_it2/assets/new_meshes/steer_rl.STL"/>
-    <mesh name="steer_rr" file="/home/zwc/scoop_it2/assets/new_meshes/steer_rr.STL"/>
+    <mesh name="steer_fl" file="/home/lsq/scoop_it/assets/urdf/steer_fl.STL"/>
+    <mesh name="steer_fr" file="/home/lsq/scoop_it/assets/urdf/steer_fr.STL"/>
+    <mesh name="steer_rl" file="/home/lsq/scoop_it/assets/urdf/steer_rl.STL"/>
+    <mesh name="steer_rr" file="/home/lsq/scoop_it/assets/urdf/steer_rr.STL"/>
 
-    <mesh name="wheel_fl" file="/home/zwc/scoop_it2/assets/new_meshes/wheel_fl.STL"/>
-    <mesh name="wheel_fr" file="/home/zwc/scoop_it2/assets/new_meshes/wheel_fr.STL"/>
-    <mesh name="wheel_rl" file="/home/zwc/scoop_it2/assets/new_meshes/wheel_rl.STL"/>
-    <mesh name="wheel_rr" file="/home/zwc/scoop_it2/assets/new_meshes/wheel_rr.STL"/>
+    <mesh name="wheel_fl" file="/home/lsq/scoop_it/assets/urdf/wheel_fl.STL"/>
+    <mesh name="wheel_fr" file="/home/lsq/scoop_it/assets/urdf/wheel_fr.STL"/>
+    <mesh name="wheel_rl" file="/home/lsq/scoop_it/assets/urdf/wheel_rl.STL"/>
+    <mesh name="wheel_rr" file="/home/lsq/scoop_it/assets/urdf/wheel_rr.STL"/>
   </asset>
 
   <contact>

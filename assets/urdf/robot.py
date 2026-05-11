@@ -2,13 +2,13 @@ import os
 import mujoco
 import mujoco.viewer
 import re
-#"/home/zwc/scoop_it2/assets/urdf/A1_RGM3.xml" 
+#"/home/lsq/scoop_it/assets/urdf/A1_RGM3.xml" 
 # 1. 解决 Ubuntu 界面模糊：强制禁用系统缩放干扰
 os.environ['QT_AUTO_SCREEN_SCALE_FACTOR'] = '0'
 os.environ['GDK_SCALE'] = '1'
 
 def main():
-    xml_path = "/home/zwc/scoop_it2/assets/urdf/A1_RGM3.xml"
+    xml_path = "/home/lsq/scoop_it/assets/urdf/A1_RGM3.xml"
     
     with open(xml_path, 'r', encoding='utf-8') as f:
         content = f.read()

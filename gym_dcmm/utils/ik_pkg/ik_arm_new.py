@@ -251,11 +251,11 @@ class IKArmQP:
         return e_pos, e_rot
 
     def solve(self, model: mujoco.MjModel, data: mujoco.MjData, Tep: np.ndarray, q_init: Optional[np.ndarray] = None):
-        t0 = time.perf_counter()
-        self._lazy_init(model)
+        t0 = time.perf_counter()# 记录开始时间，用于计算求解耗时
+        self._lazy_init(model)# 懒加载初始化，确保模型相关的参数（如关节限制）已加载
 
-        Tep = np.asarray(Tep, dtype=float).reshape(4, 4)
-
+        Tep = np.asarray(Tep, dtype=float).reshape(4, 4)# 确保目标位姿是一个 4x4 的齐次变换矩阵
+        #旋转矩阵就是三个坐标系在世界坐标系中的单位向量，第一列表示x轴指向哪里
         # optional target filter
         if self._Tep_filt is None or self.target_filter_alpha >= 0.999:
             Tep_f = Tep

@@ -3,7 +3,7 @@ import mujoco.viewer as viewer
 import time
 
 # 加载模型
-model = mujoco.MjModel.from_xml_path("a1arm.xml")
+model = mujoco.MjModel.from_xml_path("test_old.xml")
 data = mujoco.MjData(model)
 
 # 打开可视化窗口

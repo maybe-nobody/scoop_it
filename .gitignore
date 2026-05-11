@@ -1,0 +1,37 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Mujoco logs
+MUJOCO_LOG.TXT
+
+# Training outputs
+outputs/
+
+# TensorBoard / wandb / logs
+runs/
+logs/
+
+# Temporary folders
+11:43:47/
+12:03:22_4_23/
+13:28:24/
+13:28:24_old/
+13:39:50/
+13:42:28/
+15:34:56/
+15:57:18/
+16:47:45/
+16:51:50/
+17:02:30/
+17:33:56/
+18:51:49/
+18:59:35/
+20:13:19/
+20:38:12/
+
+# VSCode
+.vscode/
+
+# Conda
+.env

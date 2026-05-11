@@ -8,8 +8,8 @@ root = str(Path(path).parent)
 ASSET_PATH = os.path.join(root, "../../assets")
 # print("ASSET_PATH: ", ASSET_PATH)
 # Use Leap Hand
-XML_DCMM_LEAP_OBJECT_PATH = "urdf/test.xml"#全部（带手）训练集
-XML_DCMM_LEAP_UNSEEN_OBJECT_PATH = "urdf/test.xml"#评估集
+XML_DCMM_LEAP_OBJECT_PATH = "urdf/test_old.xml"#全部（带手）训练集
+XML_DCMM_LEAP_UNSEEN_OBJECT_PATH = "urdf/test_old.xml"#评估集
 XML_ARM_PATH = "urdf/a1arm.xml"#机械臂（不带手）
 ## Weight Saved Path
 WEIGHT_PATH = os.path.join(ASSET_PATH, "weights")
@@ -18,20 +18,23 @@ WEIGHT_PATH = os.path.join(ASSET_PATH, "weights")
 distance_thresh = 0.20#某关键点离物体剩0.25m后将跟踪任务切换为抓取任务
 
 ## Define the initial joint positions of the arm and the hand
+# arm_joints = np.array([
+#    0.0, 0.3, -0.0, 0, 0, 0 
+# ])
 arm_joints = np.array([
-   0.0, 0.3, -0.0, 0, 0, 0 
+   0.0, 0.7, -0.7, 0, 0, 0.0
 ])
 
 hand_joints = np.array([
-    0.037,0.037
+    0.0,0.0
 ])
 
 ## Define the reward weights
 reward_weights = {
     "r_base_pos": 20,
-    "r_plate_pos": 50,
+    "r_plate_pos": 80,
     "r_ee_pos": 15.0,
-    "r_precision": 35.0,
+    "r_precision": 20.0,
     "r_orient": 0.0,
     "r_touch": {
         'Tracking': 15.0,
@@ -55,6 +58,25 @@ reward_weights = {
     "r_axis_z": 0.2,
     "r_axis_min": 0.4,
     "axis_sigma": 0.06,
+
+    "r_traj": {
+    "track_sigma": 0.20,
+    "target_sigma": 0.12,
+    "mid_sigma": 0.55,
+    "track_w": [6.0, 8.0, 2.0],
+    "target_w": [0.3, 4.0, 8.0],
+    "improve": 0.5,
+    "plate_level": 2.0,
+    "base_mid": 1.5,
+    "base_dist": 4.0,
+    "vel_sync": 0.2,
+    "bar_level": 1.0,
+    "ee_height": 0.5,
+    "ctrl": 0.03,
+    "ik_fail": 2.0,
+    "collision": 10.0,
+    "success": 15.0,
+},
 }
 
 ## Define the camera params for the MujocoRenderer.

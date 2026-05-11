@@ -258,7 +258,7 @@ class PPO_Track(object):
     def restore_train(self, fn):
         if not fn:#none等加于false
             return#直接return到调用函数的地方
-        checkpoint = torch.load(fn, map_locamution = self.device)
+        checkpoint = torch.load(fn, map_location = self.device)
         self.model.load_state_dict(checkpoint['model'])
         self.running_mean_std.load_state_dict(checkpoint['running_mean_std'])
 
@@ -326,10 +326,10 @@ class PPO_Track(object):
                     + b_loss * self.bounds_loss_coef
 
                 self.optimizer.zero_grad()#把 上一轮反向传播累积在参数上的梯度清零
-                loss.backward(retain_graph=True)#计算梯度
+                loss.backward(retain_graph=True)#它从 loss 开始，沿着神经网络倒着走，计算每一个参数（权重）对误差贡献了多少。计算结果存放在 parameter.grad 里。
 
                 if self.truncate_grads:
-                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.grad_norm)#梯度裁减
+                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.grad_norm)#把梯度限制在一个范围内
                 self.optimizer.step()#使用刚刚算好的梯度，更新梯度=
 
                 with torch.no_grad():
@@ -350,6 +350,7 @@ class PPO_Track(object):
             # else:
             #     print("!!! CRITICAL: No KL data collected in this epoch !!!")
             #     av_kls = torch.tensor(0.0, device=self.device)
+            #kl是根据状态进行调节，如果新旧变化太大的话就小一点，lr是线性调节，一开始大到最后变为0，cos类似于线性但是是按照余弦函数的趋势一样调节学习率的 
             av_kls = torch.mean(torch.stack(ep_kls))
             kls.append(av_kls)
 
@@ -379,15 +380,28 @@ class PPO_Track(object):
                             ), axis=1)
             else:
                 obs_array = np.concatenate((
-                        # === 【修改点】 ===
-                        # 同样修改这里
-                        obs["base"]["v_lin_3d"], 
-                        obs["base_copy"]["v_lin_3d"], 
-                        # ================
-                        obs["arm"]["ee_pos3d"], obs["arm"]["ee_quat"], obs["arm"]["ee_v_lin_3d"],obs["arm"]["joint_pos"],
-                        obs["arm_copy"]["ee_pos3d"], obs["arm_copy"]["ee_quat"], obs["arm_copy"]["ee_v_lin_3d"],obs["arm_copy"]["joint_pos"],
-                        obs["object"]["pos3d"], obs["object"]["pos3d_copy"],obs["object"]["v_lin_3d"],obs["object"]["v_lin_3d_copy"]
-                        ), axis=1)
+                    obs["base"]["v_lin_3d"],
+                    obs["base_copy"]["v_lin_3d"],
+
+                    obs["arm"]["ee_pos3d"],
+                    obs["arm"]["ee_quat"],
+                    obs["arm"]["ee_v_lin_3d"],
+                    obs["arm"]["joint_pos"],
+
+                    obs["arm_copy"]["ee_pos3d"],
+                    obs["arm_copy"]["ee_quat"],
+                    obs["arm_copy"]["ee_v_lin_3d"],
+                    obs["arm_copy"]["joint_pos"],
+
+                    obs["object"]["pos3d"],
+                    obs["object"]["pos3d_copy"],
+                    obs["object"]["v_lin_3d"],
+                    obs["object"]["v_lin_3d_copy"],
+
+                    # 新增：轨迹观测
+                    obs["trajectory"]["plate_ref_error"],
+                    obs["trajectory"]["progress"],
+                ), axis=1)
             
             obs_tensor = torch.tensor(obs_array, dtype=torch.float32).to(self.device)
             return obs_tensor
@@ -413,7 +427,34 @@ class PPO_Track(object):
     #                 ), axis=1)#拼成一行
     #     obs_tensor = torch.tensor(obs_array, dtype=torch.float32).to(self.device)
     #     return obs_tensor
+    def _extract_success_tensor(self, infos, truncates):
+        """
+        从 env 返回的 infos 里提取 is_success。
 
+        优先使用 infos["is_success"]。
+        如果没有 is_success，则退回使用 truncates，兼容旧逻辑。
+
+        返回 shape 为 [num_actors] 的 torch.float32 tensor。
+        """
+
+        if isinstance(infos, dict) and ("is_success" in infos):
+            success_np = infos["is_success"]
+        else:
+            success_np = truncates
+
+        success_np = np.asarray(success_np, dtype=np.float32)
+
+        # 单环境时可能是标量，变成 [1]
+        if success_np.ndim == 0:
+            success_np = np.array([success_np], dtype=np.float32)
+
+        success_tensor = torch.tensor(
+            success_np,
+            dtype=torch.float32,
+            device=self.device
+        )
+
+        return success_tensor
     def action2dict(self, actions):
             if torch.isnan(actions).any() or torch.isinf(actions).any():
                 print("!!! 警告: 神经网络输出原始 actions 包含 NaN/Inf !!!")
@@ -542,13 +583,22 @@ class PPO_Track(object):
             # print("done_indices: ", done_indices)
             self.episode_rewards.update(self.current_rewards[done_indices])
             self.episode_lengths.update(self.current_lengths[done_indices])#把刚刚那些结束的环境的整个episode的奖励和长度更新到存储里面
-            self.episode_success.update(torch.tensor(truncates, dtype=torch.float32, device=self.device)[done_indices])#对“刚刚结束的 episode”，记录它是不是因为“时间到（truncate）”而结束的。
+            success_tensor = self._extract_success_tensor(infos, truncates)
+            self.episode_success.update(success_tensor[done_indices])#对“刚刚结束的 episode”，记录它是不是因为“时间到（truncate）”而结束的。
             assert isinstance(infos, dict), 'Info Should be a Dict'#isinstance(infos, dict)就是判断第一个是不是第二个，这里就是判断infos是不是dict，是的话就返回true
             # print("infos: ", infos)
             for k, v in infos.items():
-                # only log scalars
-                if isinstance(v, float) or isinstance(v, int) or (isinstance(v, torch.Tensor) and len(v.shape) == 0):
-                    self.extra_info[k] = v
+                # 记录标量
+                if isinstance(v, float) or isinstance(v, int):
+                    self.extra_info[k] = float(v)
+
+                # 记录 torch 标量
+                elif isinstance(v, torch.Tensor) and len(v.shape) == 0:
+                    self.extra_info[k] = v.item()
+
+                # 记录 numpy array 的平均值，适合 vector env
+                elif isinstance(v, np.ndarray) and np.issubdtype(v.dtype, np.number):
+                    self.extra_info[k] = float(np.mean(v))
 
             not_dones = 1.0 - self.dones.float()#把 done 掩码取反
 
@@ -578,13 +628,13 @@ class PPO_Track(object):
             # Do env step
             # Clamp the actions of the action space 
             actions = res_dict['actions']
-            print(f"DEBUG 1 - Raw Action from Model: {actions.abs().sum().item()}")
+            #print(f"DEBUG 1 - Raw Action from Model: {actions.abs().sum().item()}")
             actions[:,:] = torch.clamp(actions[:,:], -1, 1)
-            print(f"DEBUG 2 - Before Pad Shape: {actions.shape}")
+            #print(f"DEBUG 2 - Before Pad Shape: {actions.shape}")
             actions = torch.nn.functional.pad(actions, (0, self.full_action_dim-actions.size(1)), value=0)
-            print(f"DEBUG 3 - After Pad Shape: {actions.shape}")
+            #print(f"DEBUG 3 - After Pad Shape: {actions.shape}")
             actions_dict = self.action2dict(actions)
-            print("actions_dict: ", actions_dict)
+            #print("actions_dict: ", actions_dict)
             #print("actions_dict: ", actions_dict)
             obs, r, terminates, truncates, infos = self.env.step(actions_dict)
             # Map the obs
@@ -599,9 +649,12 @@ class PPO_Track(object):
             self.current_rewards += rewards
             self.current_lengths += 1
             done_indices = self.dones.nonzero(as_tuple=False)
+
             self.episode_test_rewards.update(self.current_rewards[done_indices])
             self.episode_test_lengths.update(self.current_lengths[done_indices])
-            self.episode_test_success.update(torch.tensor(truncates, dtype=torch.float32, device=self.device)[done_indices])
+
+            success_tensor = self._extract_success_tensor(infos, truncates)
+            self.episode_test_success.update(success_tensor[done_indices])
             assert isinstance(infos, dict), 'Info Should be a Dict'
             for k, v in infos.items():
                 # only log scalars

@@ -6,7 +6,7 @@ seed: -1
 torch_deterministic: False
 ## Device config
 rl_device: ???
-device_id: 2 # 'cuda:?', -1 for 'cpu'
+device_id: 0 # 'cuda:?', -1 for 'cpu'
 
 # Disables viewer or camera visualization
 viewer: False

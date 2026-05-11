@@ -95,7 +95,21 @@ class IK(ABC):
         total_i = 0#总迭代数
         total_t = 0.0#累计在 step() 中花费的总时间
         q = np.zeros(model.nv)#nv和nu都是一个数字q：当前迭代使用的关节角，初始化为 q0，后面每次 step() 会更新 q。
-        q[:] = q0[:]
+        q[:] = q0[:]#就是当前的角度值
+        #result_QP = self.ik_arm.solve(self.model_arm, self.data_arm, Tep, self.data_arm.qpos[0:6])
+    #             self.ik_arm = IKArmQP(
+    #     ee_body_name="arm_seg6",
+    #     joint_names=["arm_joint1","arm_joint2","arm_joint3","arm_joint4","arm_joint5","arm_joint6"],  # 按你模型实际名字
+    #     w_pos=1.0,
+    #     w_rot=0.15,
+    #     damping=1e-3,
+    #     tol_pos=1e-1,
+    #     tol_rot=1e-3,
+    #     max_iters=60,
+    #     max_dq=50.55,
+    #     pgd_iters=40,
+    #     line_search=False,
+    # )
         error = -1#当前误差 E（初始化为 -1 表示还没算）
         q_solved = np.zeros(model.nv)#记录“目前为止最好的 q”（即使最后失败，也会保留最后一次迭代的 q）
         # print("initial q: ", q)
