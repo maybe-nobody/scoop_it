@@ -385,4 +385,4 @@ class IKArmQP:
             if self.debug:
                 self.last_debug = IKDebug(e_pos, e_rot, J, dq, final_cost)
 
-        return vfq, success, it_used, final_cost, reached
+        return q, success, it_used, final_cost, reached

@@ -25,15 +25,36 @@ def main(config: DictConfig):#类型注解，这里的config就是从上面的hy
     torch.multiprocessing.set_start_method('spawn')#用于设置 PyTorch 多进程操作的启动方法。
     config.test = config.test#布尔值
     model_path = None
-    if config.task == 'Tracking' and config.checkpoint_tracking:#检查点路径非空
+    checkpoint_tracking_path = None
+    checkpoint_catching_path = None
+
+    # ==========================================================
+    # 统一把 checkpoint 路径转成绝对路径
+    # ==========================================================
+    if config.checkpoint_tracking:
         config.checkpoint_tracking = to_absolute_path(config.checkpoint_tracking)
-        model_path = config.checkpoint_tracking
-    elif (config.task == 'Catching_TwoStage' \
-        or config.task == 'Catching_OneStage') \
-        and config.checkpoint_catching:
+        checkpoint_tracking_path = config.checkpoint_tracking
+
+    if config.checkpoint_catching:
         config.checkpoint_catching = to_absolute_path(config.checkpoint_catching)
-        model_path = config.checkpoint_catching
-    #如果两个检查点都是空字符的话，那么if和elif后面的内容都不会执行，即从头训练
+        checkpoint_catching_path = config.checkpoint_catching
+
+    # ==========================================================
+    # 为 test 模式准备 model_path
+    #
+    # 训练时 Catching_Finetune 不再依赖 model_path 判断加载方式，
+    # 而是后面直接调用 restore_like_twostage。
+    # ==========================================================
+    if config.task == 'Tracking':
+        model_path = checkpoint_tracking_path
+
+    elif config.task == 'Catching_Finetune':
+        # 测试时优先测试 catching checkpoint；
+        # 如果没有 catching checkpoint，才退回 tracking checkpoint。
+        model_path = checkpoint_catching_path if checkpoint_catching_path else checkpoint_tracking_path
+
+    elif config.task in ['Catching_TwoStage', 'Catching_OneStage']:
+        model_path = checkpoint_catching_path
     # use the device for rl
     config.rl_device = f'cuda:{config.device_id}' if config.device_id >= 0 else 'cpu'#根据配置中的 device_id 确定训练使用的计算设备（GPU 或 CPU），并将结果存入 config.rl_device 供后续使用。
     '''# 等价于以下 if-else 语句
@@ -51,7 +72,12 @@ def main(config: DictConfig):#类型注解，这里的config就是从上面的hy
     #cprint('Start Building the Environment', 'green', attrs=['bold'])
     # Create and wrap the environment
     env_name = 'gym_dcmm/DcmmVecWorld-v0'
-    task = 'Tracking' if config.task == 'Tracking' else 'Catching'
+    if config.task == 'Tracking':
+        task = 'Tracking'
+    elif config.task in ['Catching_Finetune', 'Catching_TwoStage', 'Catching_OneStage']:
+        task = 'Catching'
+    else:
+        raise ValueError(f"Unknown task: {config.task}")
     '''
     if config.task == 'Tracking':
         # 若配置中的任务是"Tracking"(跟踪),则task赋值为"Tracking"
@@ -70,7 +96,7 @@ def main(config: DictConfig):#类型注解，这里的config就是从上面的hy
                     viewer = config.viewer,
                     print_obs = False, print_info = False,
                     print_reward = False, print_ctrl = False,
-                    print_contacts = False, object_eval = config.object_eval,
+                    print_contacts = False, object_eval = config.object_eval,#False
                     env_time = 2.5, steps_per_policy = 20)
     #创建并行强化学习环境
     output_dif = os.path.join('outputs', config.output_name)#output_name: Dcmm
@@ -81,9 +107,14 @@ def main(config: DictConfig):#类型注解，这里的config就是从上面的hy
     output_dif = os.path.join(output_dif, current_datetime_str)
     os.makedirs(output_dif, exist_ok=True)
 
-    PPO = PPO_Track if config.task == 'Tracking' else \
-          PPO_Catch_TwoStage if config.task == 'Catching_TwoStage' else \
-          PPO_Catch_OneStage#在赋值，出现括号了才是在进行实例化
+    if config.task in ["Tracking", "Catching_Finetune"]:
+        PPO = PPO_Track
+    elif config.task == "Catching_TwoStage":
+        PPO = PPO_Catch_TwoStage
+    elif config.task == "Catching_OneStage":
+        PPO = PPO_Catch_OneStage
+    else:
+        raise ValueError(f"Unknown task: {config.task}")
     agent = PPO(env, output_dif, full_config=config)#实例化，env是智能体 “感知世界” 和 “执行动作” 的接口。智能体在训练过程中会将关键数据保存到这个路径
 
     cprint('Start Training/Testing the Agent', 'green', attrs=['bold'])
@@ -111,10 +142,15 @@ def main(config: DictConfig):#类型注解，这里的config就是从上面的hy
         wandb_project: 'RL_Dcmm_Catch_Random'
         '''
 
-        agent.restore_train(model_path)#none
-        agent.train()#启动训练
+        if config.task == 'Catching_Finetune':
+            agent.restore_like_twostage(
+                checkpoint_tracking=checkpoint_tracking_path,
+                checkpoint_catching=checkpoint_catching_path,
+            )
+        else:
+            agent.restore_train(model_path)
 
-        # close wandb
+        agent.train()
         wandb.finish()
 
 if __name__ == '__main__':

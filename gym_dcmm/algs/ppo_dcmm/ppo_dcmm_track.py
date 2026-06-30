@@ -130,10 +130,14 @@ class PPO_Track(object):
         self.max_agent_steps = self.ppo_config['max_agent_steps']
         self.max_test_steps = self.ppo_config['max_test_steps']
         self.best_rewards = -10000
+        self.best_success = -1.0
         # ---- Timing
         self.data_collect_time = 0
         self.rl_train_time = 0
         self.all_time = 0
+
+
+        self.debug_prev_mu_vector = None
 
     def write_stats(self, a_losses, c_losses, b_losses, entropies, kls):
         log_dict = {
@@ -187,6 +191,30 @@ class PPO_Track(object):
         while self.agent_steps < self.max_agent_steps:
             self.epoch_num += 1#+1是指经过了一个batch
             a_losses, c_losses, b_losses, entropies, kls = self.train_epoch()
+            with torch.no_grad():
+                mu_vector = torch.cat([
+                    p.detach().flatten()
+                    for p in self.model.mu.parameters()
+                ])
+
+                if self.debug_prev_mu_vector is None:
+                    self.debug_prev_mu_vector = mu_vector.clone()
+                else:
+                    mu_delta = (mu_vector - self.debug_prev_mu_vector).abs().mean().item()
+                    self.debug_prev_mu_vector = mu_vector.clone()
+
+                    # if self.epoch_num % 10 == 0:
+                    #     mean_kl = torch.mean(torch.stack(kls)).item()
+                    #     mean_entropy = torch.mean(torch.stack(entropies)).item()
+
+                    #     print(
+                    #         "[PARAM_UPDATE_DEBUG] "
+                    #         f"epoch={self.epoch_num}, "
+                    #         f"mu_delta_per_epoch={mu_delta:.8f}, "
+                    #         f"last_lr={self.last_lr:.8f}, "
+                    #         f"mean_kl={mean_kl:.8f}, "
+                    #         f"mean_entropy={mean_entropy:.6f}"
+                    #     )
             self.storage.data_dict = None
 
             if self.lr_schedule == 'linear':
@@ -194,21 +222,33 @@ class PPO_Track(object):
             
             all_fps = self.agent_steps / (time.time() - _t)
             last_fps = (
-                self.batch_size ) \
-                / (time.time() - _last_t)
+                self.batch_size
+            ) / (time.time() - _last_t)
             _last_t = time.time()
-            info_string = f'Agent Steps: {int(self.agent_steps // 1e3):04}K | FPS: {all_fps:.1f} | ' \
-                            f'Last FPS: {last_fps:.1f} | ' \
-                            f'Collect Time: {self.data_collect_time / 60:.1f} min | ' \
-                            f'Train RL Time: {self.rl_train_time / 60:.1f} min | ' \
-                            f'Current Best: {self.best_rewards:.2f}'
-            print(info_string)
 
-            self.write_stats(a_losses, c_losses, b_losses, entropies, kls)
-
+            # ======================================================
+            # 先计算 mean_rewards / mean_lengths / mean_success
+            # 后面 info_string、tensorboard、wandb、保存 best 都要用它们
+            # ======================================================
             mean_rewards = self.episode_rewards.get_mean()
             mean_lengths = self.episode_lengths.get_mean()
             mean_success = self.episode_success.get_mean()
+
+            info_string = (
+                f'Agent Steps: {int(self.agent_steps // 1e3):04}K | '
+                f'FPS: {all_fps:.1f} | '
+                f'Last FPS: {last_fps:.1f} | '
+                f'Collect Time: {self.data_collect_time / 60:.1f} min | '
+                f'Train RL Time: {self.rl_train_time / 60:.1f} min | '
+                f'Mean Reward: {mean_rewards:.2f} | '
+                f'Mean Length: {mean_lengths:.2f} | '
+                f'Mean Success: {mean_success:.3f} | '
+                f'Best Reward: {self.best_rewards:.2f} | '
+                f'Best Success: {self.best_success:.3f}'
+            )
+            print(info_string)
+
+            self.write_stats(a_losses, c_losses, b_losses, entropies, kls)
             # print("mean_rewards: ", mean_rewards)
             self.writer.add_scalar(
                 'metrics/episode_rewards_per_step', mean_rewards, self.agent_steps)
@@ -226,7 +266,7 @@ class PPO_Track(object):
             if self.save_freq > 0:
                 if (self.epoch_num % self.save_freq == 0) and (mean_rewards <= self.best_rewards):
                     self.save(os.path.join(self.nn_dir, checkpoint_name))
-                self.save(os.path.join(self.nn_dir, f'last'))#last会在每次更新完参数都存储一下
+                self.save(os.path.join(self.nn_dir, f'last'))#每一轮 PPO 更新后都会保存 last.pth
 
             if mean_rewards > self.best_rewards:
                 print(f'save current best reward: {mean_rewards:.2f}')
@@ -236,6 +276,19 @@ class PPO_Track(object):
                     os.remove(prev_best_ckpt)
                 self.best_rewards = mean_rewards
                 self.save(os.path.join(self.nn_dir, f'best_reward_{mean_rewards:.2f}'))
+            if mean_success > self.best_success and mean_success > 0.0:
+                print(f'save current best success: {mean_success:.3f}')
+
+                prev_best_success_ckpt = os.path.join(
+                    self.nn_dir,
+                    f'best_success_{self.best_success:.3f}.pth'
+                )
+
+                if os.path.exists(prev_best_success_ckpt):
+                    os.remove(prev_best_success_ckpt)
+
+                self.best_success = mean_success
+                self.save(os.path.join(self.nn_dir, f'best_success_{mean_success:.3f}'))
 
         print('max steps achieved')
         print('data collect time: %f min' % (self.data_collect_time / 60.0))
@@ -254,19 +307,199 @@ class PPO_Track(object):
         if self.value_mean_std:
             weights['value_mean_std'] = self.value_mean_std.state_dict()
         torch.save(weights, f'{name}.pth')
-
     def restore_train(self, fn):
-        if not fn:#none等加于false
-            return#直接return到调用函数的地方
-        checkpoint = torch.load(fn, map_location = self.device)
-        self.model.load_state_dict(checkpoint['model'])
-        self.running_mean_std.load_state_dict(checkpoint['running_mean_std'])
+        """
+        按照 two-stage 的完整 checkpoint 继续训练方式加载。
 
+        加载内容：
+            1. model
+            2. running_mean_std
+            3. value_mean_std
+
+        注意：
+            不额外修改 sigma。
+            checkpoint 里保存的 sigma 是多少，就继续用多少。
+        """
+
+        if not fn:
+            return
+
+        checkpoint = torch.load(fn, map_location=self.device)
+
+        # 1. 完整加载模型参数
+        self.model.load_state_dict(checkpoint["model"], strict=True)
+        print("[TRAIN LOADED] model with strict=True")
+
+        # 2. 完整加载 obs 归一化参数
+        if self.normalize_input and ("running_mean_std" in checkpoint):
+            self.running_mean_std.load_state_dict(
+                checkpoint["running_mean_std"],
+                strict=True
+            )
+            print("[TRAIN LOADED] running_mean_std")
+
+        # 3. 完整加载 value 归一化参数
+        if self.normalize_value and ("value_mean_std" in checkpoint):
+            self.value_mean_std.load_state_dict(
+                checkpoint["value_mean_std"],
+                strict=True
+            )
+            print("[TRAIN LOADED] value_mean_std")
+
+        with torch.no_grad():
+            print(
+                "[TRAIN LOADED SIGMA] "
+                f"logstd_mean={self.model.sigma.data.mean().item():.6f}, "
+                f"logstd_min={self.model.sigma.data.min().item():.6f}, "
+                f"logstd_max={self.model.sigma.data.max().item():.6f}, "
+                f"actual_sigma_mean={torch.exp(self.model.sigma.data).mean().item():.6f}, "
+                f"actual_sigma_min={torch.exp(self.model.sigma.data).min().item():.6f}, "
+                f"actual_sigma_max={torch.exp(self.model.sigma.data).max().item():.6f}"
+            )
+
+        self.set_train()
+        print("========== Restore Train Done ==========")
+    def restore_actor_from_tracking(self, fn):
+        """
+        按照 ppo_dcmm_catch_two_stage.py 的方式加载 tracking checkpoint。
+
+        加载内容：
+            1. tracking_mlp    -> self.model.actor_mlp
+            2. tracking_mu     -> self.model.mu
+            3. tracking_sigma  -> self.model.sigma
+            4. running_mean_std -> self.running_mean_std
+
+        不加载：
+            1. critic / value_mlp
+            2. value_mean_std
+
+        注意：
+            这里不重置 mu。
+            这里不重置 sigma。
+            这里不强制把 sigma 改成 -0.5。
+        """
+
+        if not fn:
+            return
+
+        checkpoint = torch.load(fn, map_location=self.device)
+
+        # 1. 加载 tracking actor_mlp
+        if "tracking_mlp" in checkpoint:
+            self.model.actor_mlp.load_state_dict(
+                checkpoint["tracking_mlp"],
+                strict=True
+            )
+            print("[TWOSTAGE STYLE LOADED] tracking_mlp -> actor_mlp")
+        else:
+            raise KeyError("checkpoint does not contain tracking_mlp")
+
+        # 2. 加载 tracking_mu
+        if "tracking_mu" in checkpoint:
+            self.model.mu.load_state_dict(
+                checkpoint["tracking_mu"],
+                strict=True
+            )
+            print("[TWOSTAGE STYLE LOADED] tracking_mu -> mu")
+        else:
+            raise KeyError("checkpoint does not contain tracking_mu")
+
+        # 3. 加载 tracking_sigma
+        if "tracking_sigma" in checkpoint:
+            self.model.sigma.data.copy_(checkpoint["tracking_sigma"])
+            print("[TWOSTAGE STYLE LOADED] tracking_sigma -> sigma")
+        else:
+            raise KeyError("checkpoint does not contain tracking_sigma")
+
+        # 4. 加载 running_mean_std
+        if self.normalize_input and ("running_mean_std" in checkpoint):
+            self.running_mean_std.load_state_dict(
+                checkpoint["running_mean_std"],
+                strict=True
+            )
+            print("[TWOSTAGE STYLE LOADED] running_mean_std")
+        else:
+            print("[TWOSTAGE STYLE WARNING] running_mean_std not loaded")
+
+        # 5. 不加载 value_mean_std / critic
+        print("[TWOSTAGE STYLE SKIP] value_mean_std / critic")
+
+        with torch.no_grad():
+            print(
+                "[TWOSTAGE STYLE SIGMA] "
+                f"logstd_mean={self.model.sigma.data.mean().item():.6f}, "
+                f"logstd_min={self.model.sigma.data.min().item():.6f}, "
+                f"logstd_max={self.model.sigma.data.max().item():.6f}, "
+                f"actual_sigma_mean={torch.exp(self.model.sigma.data).mean().item():.6f}, "
+                f"actual_sigma_min={torch.exp(self.model.sigma.data).min().item():.6f}, "
+                f"actual_sigma_max={torch.exp(self.model.sigma.data).max().item():.6f}"
+            )
+
+        self.set_train()
+        print("========== Restore Actor From Tracking Done: TwoStage Style ==========")
+    def restore_like_twostage(self, checkpoint_tracking=None, checkpoint_catching=None):
+        """
+        模仿 ppo_dcmm_catch_two_stage.py 的 checkpoint 加载优先级。
+
+        优先级：
+            1. 如果 checkpoint_catching 有值：
+                  加载完整 catching checkpoint
+                  不加载 checkpoint_tracking
+
+            2. 如果 checkpoint_catching 为空，但 checkpoint_tracking 有值：
+                  加载 tracking_mlp
+                  加载 tracking_mu
+                  加载 tracking_sigma
+                  加载 running_mean_std
+
+            3. 两个都没有：
+                  从头训练
+        """
+
+        if checkpoint_catching:
+            print("[TWOSTAGE STYLE] checkpoint_catching is provided.")
+            print("[TWOSTAGE STYLE] load catching checkpoint and skip tracking checkpoint.")
+            self.restore_train(checkpoint_catching)
+            return
+
+        if checkpoint_tracking:
+            print("[TWOSTAGE STYLE] checkpoint_catching is empty.")
+            print("[TWOSTAGE STYLE] load tracking checkpoint.")
+            self.restore_actor_from_tracking(checkpoint_tracking)
+            return
+
+        print("[TWOSTAGE STYLE] no checkpoint loaded, train from scratch.")
     def restore_test(self, fn):
-        checkpoint = torch.load(fn, map_location = self.device)
-        self.model.load_state_dict(checkpoint['model'])
-        if self.normalize_input:
-            self.running_mean_std.load_state_dict(checkpoint['running_mean_std'])
+        """
+        测试时应该完整加载 checkpoint。
+
+        注意：
+        这里不跳过 sigma；
+        不跳过 running_mean_std；
+        不做 compatible_obs_dim 截断；
+        要求当前模型结构和 checkpoint 完全一致。
+        """
+        if not fn:
+            return
+
+        checkpoint = torch.load(fn, map_location=self.device)
+
+        # 1. 完整加载模型参数
+        self.model.load_state_dict(checkpoint["model"], strict=True)
+        print("[TEST LOADED] model with strict=True")
+
+        # 2. 完整加载 obs normalization
+        if self.normalize_input and ("running_mean_std" in checkpoint):
+            self.running_mean_std.load_state_dict(checkpoint["running_mean_std"])
+            print("[TEST LOADED] running_mean_std")
+
+        # 3. 完整加载 value normalization
+        if self.normalize_value and ("value_mean_std" in checkpoint):
+            self.value_mean_std.load_state_dict(checkpoint["value_mean_std"])
+            print("[TEST LOADED] value_mean_std")
+
+        # 4. 切换 eval
+        self.set_eval()
 
     def train_epoch(self):#这个函数到结束完成了就数据的收集并对数据进行训练修改了网络的参数
         # collect minibatch data
@@ -330,11 +563,30 @@ class PPO_Track(object):
 
                 if self.truncate_grads:
                     torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.grad_norm)#把梯度限制在一个范围内
-                self.optimizer.step()#使用刚刚算好的梯度，更新梯度=
+
+                self.optimizer.step()#使用刚刚算好的梯度，更新参数
+
+                # ==========================================================
+                # Catching_Finetune 阶段限制 sigma，防止 optimizer 又把 sigma 学回 0 附近
+                #
+                # 限制范围：
+                #   sigma_param ∈ [-4.0, -2.0]
+                #   actual_sigma ∈ [exp(-4), exp(-2)]
+                #               ≈ [0.018, 0.135]
+                #
+                # 这样训练动作仍有随机探索，但不会严重破坏测试时已经会接的均值动作。
+                # ==========================================================
+                # try:
+                #     task_name = str(self.env.call("task")[0])
+                # except Exception:
+                #     task_name = ""
+
+                # if "Catching" in task_name:
+                #     with torch.no_grad():
+                #         self.model.sigma.data.clamp_(min=-2, max=-1.5)
 
                 with torch.no_grad():
                     kl_dist = policy_kl(mu.detach(), sigma.detach(), old_mu, old_sigma)#不参与训练的情况下，计算新策略和旧策略之间的 KL 距离，用来监控 PPO 更新是不是走太远了
-                    #返回的是新策略离旧策略有多远
                 kl = kl_dist
                 a_losses.append(a_loss)#就是刚才求出来的a_loss，a_losses是一个列表，就是放在列表里
                 c_losses.append(c_loss)
@@ -366,45 +618,30 @@ class PPO_Track(object):
         return a_losses, c_losses, b_losses, entropies, kls
     
     def obs2tensor(self, obs):
-            # Map the step result to tensor
-            if self.env.call('task')[0] == 'Catching':
-                obs_array = np.concatenate((
-                            # === 【修改点】 ===
-                            # 原来是 obs["base"]["v_lin_2d"]
-                            # 现在改为:
-                            obs["base"]["v_lin_3d"], 
-                            # ================
-                            obs["arm"]["ee_pos3d"], obs["arm"]["ee_quat"], obs["arm"]["ee_v_lin_3d"],
-                            obs["object"]["pos3d"], obs["object"]["v_lin_3d"], 
-                            obs["hand"],
-                            ), axis=1)
-            else:
-                obs_array = np.concatenate((
-                    obs["base"]["v_lin_3d"],
-                    obs["base_copy"]["v_lin_3d"],
+        obs_array = np.concatenate((
+            obs["base1"]["v_lin_3d"],
+            obs["base1"]["base_pos"],
+            obs["base2"]["v_lin_3d"],
+            obs["base2"]["base_pos"],
 
-                    obs["arm"]["ee_pos3d"],
-                    obs["arm"]["ee_quat"],
-                    obs["arm"]["ee_v_lin_3d"],
-                    obs["arm"]["joint_pos"],
+            obs["arm1"]["ee_pos3d"],
+            obs["arm1"]["ee_quat"],
+            obs["arm1"]["ee_v_lin_3d"],
+            obs["arm1"]["joint_pos"],
 
-                    obs["arm_copy"]["ee_pos3d"],
-                    obs["arm_copy"]["ee_quat"],
-                    obs["arm_copy"]["ee_v_lin_3d"],
-                    obs["arm_copy"]["joint_pos"],
+            obs["arm2"]["ee_pos3d"],
+            obs["arm2"]["ee_quat"],
+            obs["arm2"]["ee_v_lin_3d"],
+            obs["arm2"]["joint_pos"],
 
-                    obs["object"]["pos3d"],
-                    obs["object"]["pos3d_copy"],
-                    obs["object"]["v_lin_3d"],
-                    obs["object"]["v_lin_3d_copy"],
+            obs["object"]["pos3d"],
+            obs["object"]["v_lin_3d"],
 
-                    # 新增：轨迹观测
-                    obs["trajectory"]["plate_ref_error"],
-                    obs["trajectory"]["progress"],
-                ), axis=1)
-            
-            obs_tensor = torch.tensor(obs_array, dtype=torch.float32).to(self.device)
-            return obs_tensor
+            obs["plate"]["plate_pos"],
+        ), axis=1)
+
+        obs_tensor = torch.tensor(obs_array, dtype=torch.float32).to(self.device)
+        return obs_tensor
     # def obs2tensor(self, obs):
     #     # Map the step result to tensor
     #     if self.env.call('task')[0] == 'Catching':
@@ -427,77 +664,244 @@ class PPO_Track(object):
     #                 ), axis=1)#拼成一行
     #     obs_tensor = torch.tensor(obs_array, dtype=torch.float32).to(self.device)
     #     return obs_tensor
+    def _to_1d_float_np(self, x):
+        """
+        把标量 / list / np.ndarray / torch.Tensor 统一转成 1D float32 numpy。
+        适配单环境和多环境。
+        """
+        if isinstance(x, torch.Tensor):
+            x = x.detach().cpu().numpy()
+
+        x = np.asarray(x, dtype=np.float32)
+
+        if x.ndim == 0:
+            x = np.array([x.item()], dtype=np.float32)
+
+        return x.reshape(-1)
+
+
+    # def _extract_success_tensor(self, infos, truncates):
+    #     """
+    #     提取 episode 是否成功。
+
+    #     优先级：
+    #         1. infos["done_success"]：环境明确告诉 PPO 这个 done 是成功 done；
+    #         2. infos["episode_success"]：环境明确告诉 PPO done episode 是否成功；
+    #         3. infos["is_success"] 和 truncates 合并，作为兼容旧逻辑；
+    #         4. 如果什么都没有，最后才退回 truncates。
+    #     """
+
+    #     trunc_np = self._to_1d_float_np(truncates)
+
+    #     if isinstance(infos, dict) and ("done_success" in infos):
+    #         success_np = self._to_1d_float_np(infos["done_success"])
+
+    #     elif isinstance(infos, dict) and ("episode_success" in infos):
+    #         success_np = self._to_1d_float_np(infos["episode_success"])
+
+    #     elif isinstance(infos, dict) and ("is_success" in infos):
+    #         info_success_np = self._to_1d_float_np(infos["is_success"])
+
+    #         # 兼容旧环境：
+    #         # 如果成功 done 用 truncated=True 表示，而 is_success 某些时候没对上，
+    #         # 这里至少不会漏掉 truncated 成功。
+    #         success_np = np.maximum(info_success_np, trunc_np)
+
+    #     else:
+    #         success_np = trunc_np
+
+    #     success_tensor = torch.tensor(
+    #         success_np,
+    #         dtype=torch.float32,
+    #         device=self.device
+    #     )
+
+    #     return success_tensor
+    def _to_1d_float_np(self, x):
+        """
+        把标量 / list / np.ndarray / torch.Tensor 统一转成 1D float32 numpy。
+        适配单环境和多环境。
+        """
+        if isinstance(x, torch.Tensor):
+            x = x.detach().cpu().numpy()
+
+        x = np.asarray(x, dtype=np.float32)
+
+        if x.ndim == 0:
+            x = np.array([float(x.item())], dtype=np.float32)
+
+        return x.reshape(-1).astype(np.float32)
+
+
+    def _expand_to_num_actors(self, x_np):
+        """
+        保证 x_np 的 shape 是 [num_actors]。
+        """
+        x_np = np.asarray(x_np, dtype=np.float32).reshape(-1)
+
+        if x_np.size == 1 and self.num_actors > 1:
+            x_np = np.full(
+                (self.num_actors,),
+                float(x_np.item()),
+                dtype=np.float32
+            )
+
+        if x_np.size != self.num_actors:
+            print(
+                "\n[WARNING SUCCESS SHAPE] "
+                f"x_np.shape={x_np.shape}, "
+                f"num_actors={self.num_actors}, "
+                f"x_np={x_np}"
+            )
+
+            fixed = np.zeros((self.num_actors,), dtype=np.float32)
+            copy_len = min(x_np.size, self.num_actors)
+            fixed[:copy_len] = x_np[:copy_len]
+            x_np = fixed
+
+        return x_np
+
+
     def _extract_success_tensor(self, infos, truncates):
         """
-        从 env 返回的 infos 里提取 is_success。
+        提取 episode 是否成功。
 
-        优先使用 infos["is_success"]。
-        如果没有 is_success，则退回使用 truncates，兼容旧逻辑。
+        关键：
+            不要让 infos["done_success"] 的 0 覆盖 truncates 的 1。
+            训练并行环境中，infos 可能和最后 done 帧不完全对齐，
+            但 truncates 通常还能正确表示这个 env 刚刚成功结束。
 
-        返回 shape 为 [num_actors] 的 torch.float32 tensor。
+        统计逻辑：
+            success = max(truncates, done_success, episode_success, is_success)
         """
 
-        if isinstance(infos, dict) and ("is_success" in infos):
-            success_np = infos["is_success"]
-        else:
-            success_np = truncates
+        # 1. 先用 truncates 作为基础成功信号
+        trunc_np = self._expand_to_num_actors(
+            self._to_1d_float_np(truncates)
+        )
 
-        success_np = np.asarray(success_np, dtype=np.float32)
+        success_np = trunc_np.copy()
 
-        # 单环境时可能是标量，变成 [1]
-        if success_np.ndim == 0:
-            success_np = np.array([success_np], dtype=np.float32)
+        # 2. 合并 done_success
+        if isinstance(infos, dict) and "done_success" in infos:
+            done_success_np = self._expand_to_num_actors(
+                self._to_1d_float_np(infos["done_success"])
+            )
+            success_np = np.maximum(success_np, done_success_np)
 
-        success_tensor = torch.tensor(
+        # 3. 合并 episode_success
+        if isinstance(infos, dict) and "episode_success" in infos:
+            episode_success_np = self._expand_to_num_actors(
+                self._to_1d_float_np(infos["episode_success"])
+            )
+            success_np = np.maximum(success_np, episode_success_np)
+
+        # 4. 合并 is_success
+        if isinstance(infos, dict) and "is_success" in infos:
+            is_success_np = self._expand_to_num_actors(
+                self._to_1d_float_np(infos["is_success"])
+            )
+            success_np = np.maximum(success_np, is_success_np)
+
+        success_np = np.clip(success_np, 0.0, 1.0).astype(np.float32)
+
+        return torch.tensor(
             success_np,
             dtype=torch.float32,
             device=self.device
-        )
-
-        return success_tensor
+        ).view(-1)
     def action2dict(self, actions):
-            if torch.isnan(actions).any() or torch.isinf(actions).any():
-                print("!!! 警告: 神经网络输出原始 actions 包含 NaN/Inf !!!")
-            actions = actions.cpu().numpy()
-            current_batch = actions.shape[0]
-            #print(f"DEBUG: current_batch = {current_batch}")
-            #actions = np.zeros_like(actions)
-            # De-normalize the actions
-            if self.env.call('task')[0] == 'Tracking':
-                # === 【修改点 1】: Base 现在取前 3 位 (0, 1, 2) ===
-                # 原代码: base_tensor = actions[:, :2] * self.action_track_denorm[0]
-                # 修改后:
-                base_tensor = actions[:, :2] * self.action_track_denorm[0]
-                base_tensor_copy = actions[:, 2:4] * self.action_track_denorm[0]
-                # === 【修改点 2】: Arm 的索引顺延 ===
-                # 原代码: arm_tensor = actions[:, 2:5] ... (取第 2,3,4 位，共3位)
-                # 修改后: 从第 3 位开始取 (取第 3,4,5 位)
-                arm_tensor = actions[:, 4:7] * self.action_track_denorm[1]
-                arm_tensor_copy = actions[:, 7:10] * self.action_track_denorm[1]
-                # hand_tensor = np.zeros((self.batch_size, 2))
-                # hand_tensor_copy = np.zeros((self.batch_size, 2))
-                hand_tensor = np.zeros((current_batch, 2))
-                hand_tensor_copy = np.zeros((current_batch, 2))
-                # === 【修改点 3】: Hand 的索引顺延 ===
-                # 原代码: hand_tensor = actions[:, 5:] ...
-                # 修改后: 从第 6 位开始取
-                # hand_tensor = actions[:, 10:12] * self.action_track_denorm[2]
-                # hand_tensor_copy = actions[:, 12:14] * self.action_track_denorm[2]
-            else:
-                # 如果 Catching 任务也要改，逻辑同上
-                base_tensor = actions[:, :3] * self.action_catch_denorm[0]
-                arm_tensor = actions[:, 3:6] * self.action_catch_denorm[1]
-                hand_tensor = actions[:, 6:] * self.action_catch_denorm[2]
-                
-            actions_dict = {
-                'arm': arm_tensor,
-                'base': base_tensor,
-                'hand': hand_tensor,
-                'base_copy': base_tensor_copy,
-                'arm_copy': arm_tensor_copy,
-                'hand_copy': hand_tensor_copy,
-            }
-            return actions_dict
+        if torch.isnan(actions).any() or torch.isinf(actions).any():
+            print("!!! 警告: 神经网络输出原始 actions 包含 NaN/Inf !!!")
+
+        actions = actions.cpu().numpy()
+        current_batch = actions.shape[0]
+
+        # Tracking 和 Catching_Finetune 都使用同一套 10 维动作：
+        # [base(2), base_copy(2), arm(3), arm_copy(3)]
+        base_tensor = actions[:, 0:2] * self.action_track_denorm[0]
+        base_tensor_copy = actions[:, 2:4] * self.action_track_denorm[0]
+
+        arm_tensor = actions[:, 4:7] * self.action_track_denorm[1]
+        arm_tensor_copy = actions[:, 7:10] * self.action_track_denorm[1]
+        # ==========================================================
+        # ACTION_DENORM_DEBUG
+        # 目的：
+        #   检查网络输出经过 clamp + denorm 后，真正送进环境的动作有多大。
+        #
+        # 如果 base_mean / arm_mean 很小：
+        #   说明动作太小，盘子当然不靠近。
+        #
+        # 如果 raw_action 很大但 denorm 后还是小：
+        #   说明 action_track_denorm 太小。
+        # ==========================================================
+        if not hasattr(self, "debug_action2dict_counter"):
+            self.debug_action2dict_counter = 0
+
+        self.debug_action2dict_counter += 1
+
+        # 不要每一步都打印，否则日志太多。
+        # 这里每 200 次 action2dict 打印一次。
+        # if self.debug_action2dict_counter % 200 == 1:
+        #     raw_base = actions[:, 0:2]
+        #     raw_base_copy = actions[:, 2:4]
+        #     raw_arm = actions[:, 4:7]
+        #     raw_arm_copy = actions[:, 7:10]
+
+        #     debug_raw_action_abs_mean = float(np.abs(actions[:, :10]).mean())
+        #     debug_raw_action_abs_max = float(np.abs(actions[:, :10]).max())
+
+        #     debug_base_mean = float(np.abs(base_tensor).mean())
+        #     debug_base_max = float(np.abs(base_tensor).max())
+
+        #     debug_base_copy_mean = float(np.abs(base_tensor_copy).mean())
+        #     debug_base_copy_max = float(np.abs(base_tensor_copy).max())
+
+        #     debug_arm_mean = float(np.abs(arm_tensor).mean())
+        #     debug_arm_max = float(np.abs(arm_tensor).max())
+
+        #     debug_arm_copy_mean = float(np.abs(arm_tensor_copy).mean())
+        #     debug_arm_copy_max = float(np.abs(arm_tensor_copy).max())
+
+        #     print(
+        #         "[ACTION_DENORM_DEBUG] "
+        #         f"raw_action_abs_mean={debug_raw_action_abs_mean:.4f}, "
+        #         f"raw_action_abs_max={debug_raw_action_abs_max:.4f}, "
+        #         f"base_mean={debug_base_mean:.4f}, "
+        #         f"base_max={debug_base_max:.4f}, "
+        #         f"base_copy_mean={debug_base_copy_mean:.4f}, "
+        #         f"base_copy_max={debug_base_copy_max:.4f}, "
+        #         f"arm_mean={debug_arm_mean:.4f}, "
+        #         f"arm_max={debug_arm_max:.4f}, "
+        #         f"arm_copy_mean={debug_arm_copy_mean:.4f}, "
+        #         f"arm_copy_max={debug_arm_copy_max:.4f}"
+        #     )
+
+        #     # 也写进 extra_info，方便 wandb / tensorboard 看趋势
+        #     self.extra_info["debug_raw_action_abs_mean"] = debug_raw_action_abs_mean
+        #     self.extra_info["debug_raw_action_abs_max"] = debug_raw_action_abs_max
+        #     self.extra_info["debug_denorm_base_mean"] = debug_base_mean
+        #     self.extra_info["debug_denorm_base_max"] = debug_base_max
+        #     self.extra_info["debug_denorm_base_copy_mean"] = debug_base_copy_mean
+        #     self.extra_info["debug_denorm_base_copy_max"] = debug_base_copy_max
+        #     self.extra_info["debug_denorm_arm_mean"] = debug_arm_mean
+        #     self.extra_info["debug_denorm_arm_max"] = debug_arm_max
+        #     self.extra_info["debug_denorm_arm_copy_mean"] = debug_arm_copy_mean
+        #     self.extra_info["debug_denorm_arm_copy_max"] = debug_arm_copy_max
+        # 当前任务是盘子接物体，不用手，hand 始终置零
+        hand_tensor = np.zeros((current_batch, 2), dtype=np.float32)
+        hand_tensor_copy = np.zeros((current_batch, 2), dtype=np.float32)
+
+        actions_dict = {
+            'arm': arm_tensor,
+            'base': base_tensor,
+            'hand': hand_tensor,
+            'base_copy': base_tensor_copy,
+            'arm_copy': arm_tensor_copy,
+            'hand_copy': hand_tensor_copy,
+        }
+
+        return actions_dict
     # def action2dict(self, actions):
     #     actions = actions.cpu().numpy()
     #     # De-normalize the actions
@@ -541,16 +945,67 @@ class PPO_Track(object):
             'sigmas': sigma,
         }
         '''
-    def play_steps(self):#去环境里面跑一圈，在这个函数里面策略是没有发生变化的
+    def play_steps(self):
+        # ======================================================
+        # rollout 级别成功日志
+        # 这些 key 不能用最后一步覆盖，否则成功那一帧会被后面的 0 覆盖。
+        # 所以每个 rollout 开始先清零，后面用 max 记录。
+        # ======================================================
+        success_log_keys = {
+            "is_success",
+            "raw_success",
+            "success_counter",
+            "success_object_on_plate",
+            "success_safe",
+            "success_has_success",
+            "success_bonus_given",
+            "reward_object_on_plate",
+            "reward_success",
+            "done_success",
+            "episode_success",
+        }
+
+        for key in success_log_keys:
+            self.extra_info[key] = 0.0
+
         for n in range(self.horizon_length):#在一次 rollout 中，每个并行环境最多执行 horizon_length（一次 rollout 中，策略连续与环境交互的“最大步数”） 次 env.step()
             res_dict = self.model_act(self.obs)
-            # Collect o_t
             self.storage.update_data('obses', n, self.obs['obs'])
             for k in ['actions', 'neglogpacs', 'values', 'mus', 'sigmas']:
                 self.storage.update_data(k, n, res_dict[k])
             # Do env step
             # Clamp the actions of the action space
             actions = res_dict['actions']
+            # ==========================================================
+            # ACTION_BOUND_DEBUG：训练时检查采样动作 clamp 前是否越界
+            # ==========================================================
+            before_clamp = actions.detach().clone()
+
+            clip_high_mask = before_clamp > 1.0
+            clip_low_mask = before_clamp < -1.0
+            clip_mask = clip_high_mask | clip_low_mask
+            near_boundary_mask = (before_clamp > 0.95) | (before_clamp < -0.95)
+
+            debug_action_clip_rate = float(clip_mask.float().mean().item())
+            debug_action_near_boundary_rate = float(near_boundary_mask.float().mean().item())
+            debug_action_before_clip_abs_mean = float(before_clamp.abs().mean().item())
+            debug_action_before_clip_abs_max = float(before_clamp.abs().max().item())
+
+            debug_base_clip_rate = float(clip_mask[:, 0:2].float().mean().item())
+            debug_base_copy_clip_rate = float(clip_mask[:, 2:4].float().mean().item())
+            debug_arm_clip_rate = float(clip_mask[:, 4:7].float().mean().item())
+            debug_arm_copy_clip_rate = float(clip_mask[:, 7:10].float().mean().item())
+
+            self.extra_info["debug_action_clip_rate"] = debug_action_clip_rate
+            self.extra_info["debug_action_near_boundary_rate"] = debug_action_near_boundary_rate
+            self.extra_info["debug_action_before_clip_abs_mean"] = debug_action_before_clip_abs_mean
+            self.extra_info["debug_action_before_clip_abs_max"] = debug_action_before_clip_abs_max
+            self.extra_info["debug_base_clip_rate"] = debug_base_clip_rate
+            self.extra_info["debug_base_copy_clip_rate"] = debug_base_copy_clip_rate
+            self.extra_info["debug_arm_clip_rate"] = debug_arm_clip_rate
+            self.extra_info["debug_arm_copy_clip_rate"] = debug_arm_copy_clip_rate
+
+
             actions[:,:] = torch.clamp(actions[:,:], -1, 1)#防止数值越界
             actions = torch.nn.functional.pad(actions, (0, self.full_action_dim-actions.size(1)), value=0)#需要补多少维度，补上的维度全部设置为0
             actions_dict = self.action2dict(actions)#反归一化
@@ -567,8 +1022,18 @@ class PPO_Track(object):
             r = torch.tensor(r, dtype=torch.float32).to(self.device)
             rewards = r.unsqueeze(1)#增加一个列维度，rewards.shape = [N, 1]
             # Map the dones
-            dones = terminates | truncates#如果既没终止也没截断，就会返回两个false，都是false游戏继续，按位进行或
-            self.dones = torch.tensor(dones, dtype=torch.uint8).to(self.device)#把dones变成0或1放到gpu上，看看环境是不是还活着
+            
+            # dones = terminates | truncates#如果既没终止也没截断，就会返回两个false，都是false游戏继续，按位进行或
+            # self.dones = torch.tensor(dones, dtype=torch.uint8).to(self.device)#把dones变成0或1放到gpu上，看看环境是不是还活着
+            terminates = np.asarray(terminates, dtype=bool).reshape(-1)
+            truncates = np.asarray(truncates, dtype=bool).reshape(-1)
+            dones = terminates | truncates
+
+            self.dones = torch.tensor(
+                dones,
+                dtype=torch.uint8,
+                device=self.device
+            )
             # Update dones and rewards after env step
             self.storage.update_data('dones', n, self.dones)#把“这一刻是否结束”存进时间轴，n就是代表时间
             shaped_rewards = self.reward_scale_value * rewards.clone()#奖励缩放
@@ -579,26 +1044,52 @@ class PPO_Track(object):
             self.current_rewards += rewards#当前 episode 的累计 reward
             self.current_lengths += 1#当前episode的累积长度
             # print("self.dones: ", self.dones)
-            done_indices = self.dones.nonzero(as_tuple=False)#nonzero返回张量的非0索引
-            # print("done_indices: ", done_indices)
-            self.episode_rewards.update(self.current_rewards[done_indices])
-            self.episode_lengths.update(self.current_lengths[done_indices])#把刚刚那些结束的环境的整个episode的奖励和长度更新到存储里面
-            success_tensor = self._extract_success_tensor(infos, truncates)
-            self.episode_success.update(success_tensor[done_indices])#对“刚刚结束的 episode”，记录它是不是因为“时间到（truncate）”而结束的。
+           
+           
+            done_indices = self.dones.nonzero(as_tuple=False).squeeze(-1)
+
+            if done_indices.numel() > 0:
+                self.episode_rewards.update(self.current_rewards[done_indices])
+                self.episode_lengths.update(self.current_lengths[done_indices])
+
+                # success_tensor = self._extract_success_tensor(infos, truncates)
+                # self.episode_success.update(success_tensor[done_indices])
+                success_tensor = self._extract_success_tensor(infos, truncates).view(-1)
+                selected_success = success_tensor[done_indices].view(-1)
+
+                self.episode_success.update(selected_success.detach().view(-1))
+
             assert isinstance(infos, dict), 'Info Should be a Dict'#isinstance(infos, dict)就是判断第一个是不是第二个，这里就是判断infos是不是dict，是的话就返回true
             # print("infos: ", infos)
             for k, v in infos.items():
-                # 记录标量
+                # ======================================================
+                # 把不同类型的 info 统一转成 float，用于 TensorBoard
+                # ======================================================
                 if isinstance(v, float) or isinstance(v, int):
-                    self.extra_info[k] = float(v)
+                    val = float(v)
 
-                # 记录 torch 标量
-                elif isinstance(v, torch.Tensor) and len(v.shape) == 0:
-                    self.extra_info[k] = v.item()
+                elif isinstance(v, torch.Tensor):
+                    if v.numel() == 1:
+                        val = float(v.item())
+                    else:
+                        val = float(v.float().mean().item())
 
-                # 记录 numpy array 的平均值，适合 vector env
                 elif isinstance(v, np.ndarray) and np.issubdtype(v.dtype, np.number):
-                    self.extra_info[k] = float(np.mean(v))
+                    val = float(np.mean(v))
+
+                else:
+                    continue
+
+                # ======================================================
+                # 成功类日志用 max，防止成功那一帧被后面的 0 覆盖
+                # ======================================================
+                if k in success_log_keys:
+                    self.extra_info[k] = max(
+                        float(self.extra_info.get(k, 0.0)),
+                        val
+                    )
+                else:
+                    self.extra_info[k] = val
 
             not_dones = 1.0 - self.dones.float()#把 done 掩码取反
 
@@ -606,6 +1097,7 @@ class PPO_Track(object):
             self.current_lengths = self.current_lengths * not_dones#清零已结束环境的累计长度
 
         res_dict = self.model_act(self.obs)#有可能episode并没有走完，可能是rolout步数到了但是一个episode并没有走完，所以再让他走一步
+
         last_values = res_dict['values']
 
         self.agent_steps = (self.agent_steps + self.batch_size)#统计agent一共走了多少步
@@ -648,18 +1140,27 @@ class PPO_Track(object):
             # Update dones and rewards after env step
             self.current_rewards += rewards
             self.current_lengths += 1
-            done_indices = self.dones.nonzero(as_tuple=False)
+            done_indices = self.dones.nonzero(as_tuple=False).squeeze(-1)
 
-            self.episode_test_rewards.update(self.current_rewards[done_indices])
-            self.episode_test_lengths.update(self.current_lengths[done_indices])
+            if done_indices.numel() > 0:
+                self.episode_test_rewards.update(self.current_rewards[done_indices])
+                self.episode_test_lengths.update(self.current_lengths[done_indices])
 
-            success_tensor = self._extract_success_tensor(infos, truncates)
-            self.episode_test_success.update(success_tensor[done_indices])
+                success_tensor = self._extract_success_tensor(infos, truncates)
+                self.episode_test_success.update(success_tensor[done_indices])
             assert isinstance(infos, dict), 'Info Should be a Dict'
             for k, v in infos.items():
-                # only log scalars
-                if isinstance(v, float) or isinstance(v, int) or (isinstance(v, torch.Tensor) and len(v.shape) == 0):
-                    self.extra_info[k] = v
+                if isinstance(v, float) or isinstance(v, int):
+                    self.extra_info[k] = float(v)
+
+                elif isinstance(v, torch.Tensor):
+                    if v.numel() == 1:
+                        self.extra_info[k] = float(v.item())
+                    else:
+                        self.extra_info[k] = float(v.float().mean().item())
+
+                elif isinstance(v, np.ndarray) and np.issubdtype(v.dtype, np.number):
+                    self.extra_info[k] = float(np.mean(v))
 
             not_dones = 1.0 - self.dones.float()
 

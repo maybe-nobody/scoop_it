@@ -42,7 +42,7 @@ class PPO_Catch_TwoStage(object):
         print("net_config: ", net_config)
         self.model = ActorCritic(net_config)
         self.model.to(self.device)
-        self.running_mean_std_track = RunningMeanStd(self.obs_t_shape).to(self.device)
+        self.running_mean_std_track = RunningMeanStd(self.obs_t_shape).to(self.device)#用来归一化tracking网络的输入
         self.running_mean_std_hand = RunningMeanStd((2,)).to(self.device)
         self.value_mean_std = RunningMeanStd((1,)).to(self.device)
         # print("### Start loading tracking model")
@@ -137,15 +137,21 @@ class PPO_Catch_TwoStage(object):
         actor_path: Path to save actor model parameters.
         """
         print("### Start loading tracking model")
-        if checkpoint_catching or not checkpoint_tracking:
+        if checkpoint_catching or not checkpoint_tracking:#checkpoint_tracking 有值并且 checkpoint_catching 没有值，在这个条件下才会加载
             return
         self.model.actor_mlp_t.load_state_dict(torch.load(checkpoint_tracking, map_location=self.device)['tracking_mlp'])
-        self.model.mu_t.load_state_dict(torch.load(checkpoint_tracking, map_location=self.device)['tracking_mu'])
-        self.model.sigma_t.data.copy_(torch.load(checkpoint_tracking, map_location=self.device)['tracking_sigma'])
+        self.model.mu_t.load_state_dict(torch.load(checkpoint_tracking, map_location=self.device)['tracking_mu'])#输出的是动作分布的均值，就是数字，要和sigma共同作用才能生成概率分布
+        self.model.sigma_t.data.copy_(torch.load(checkpoint_tracking, map_location=self.device)['tracking_sigma'])#mu是通过神经网络计算出来的，sigma是自己定义然后通过优化器优化出来的
         print("self.model.sigma_t.data: ", self.model.sigma_t.data)
         self.running_mean_std_track.load_state_dict(torch.load(checkpoint_tracking, map_location=self.device)['running_mean_std'])
         print("### Done loading tracking model")
-
+    # def restore_train(self, fn):
+    #     if not fn:
+    #         return
+    #     checkpoint = torch.load(fn, map_location = self.device)
+    #     self.model.load_state_dict(checkpoint['model'])
+    #     self.running_mean_std_track.load_state_dict(checkpoint['running_mean_std_track'])
+    #     self.running_mean_std_hand.load_state_dict(checkpoint['running_mean_std_hand'])
     def write_stats(self, a_losses, c_losses, b_losses, entropies, kls):
         log_dict = {
             'performance/RLTrainFPS': self.agent_steps / self.rl_train_time,

@@ -24,27 +24,36 @@ ppo:
   normalize_advantage: True
   gamma: 0.99
   tau: 0.95
-  learning_rate: 5e-4
+  learning_rate: 5e-5
+  #learning_rate: 5e-4   #在对之前的模型进行微调时，建议将学习率降低到 1e-5 或更低，以避免过大的更新导致模型性能下降，因为是已经训练好的，所以如果学习率很大的话容易很轻松的破坏原来的模型，
   lr_schedule: kl  # 'fixed' | 'linear' | 'kl' | 'cos'
-  kl_threshold: 0.016
+  kl_threshold: 0.015
+  #kl_threshold: 0.016
   save_best_after: 500
   save_frequency: 2000
-  grad_norm: 1.0
-  entropy_coef: 0.0
+  grad_norm: 0.5
+  #grad_norm: 1.0
+  entropy_coef: 0.001
+  #entropy_coef: 0.001
   freeze_base: False
   freeze_arm: False
   truncate_grads: True
   e_clip: 0.2
+  #e_clip: 0.1
   action_track_denorm: [1.5, 0.025, 0.01] # 1.5 for the base action, 0.025 for the end-effector action, 0.15 for the hand action
   # action_catch_denorm: [0.25, 0.01, 0.15] # 1.5 for the base action, 0.025 for the end-effector action, 0.15 for the hand action
-  action_catch_denorm: [1, 0.025, 0.15]
-  horizon_length: 64
-  minibatch_size: 512
-  mini_epochs: 6
+  action_catch_denorm: [1.8, 0.03, 0.15]
+  horizon_length: 64 #每个环境在一次 rollout 中执行 64 次策略动作。rollout就是当前策略不更新参数，先去环境里连续跑一段时间，收集训练数据
+  minibatch_size: 512 #每次取多少数据进行训练，batch_sice=  horizon_length * minibatch_size
+  #minibatch_size: 1024
+  #这一整批 rollout 数据可以被切成多少个 minibatch  num_minibatches = batch_size / minibatch_size
+  mini_epochs: 6 #同一批数据会被训六轮
+  #mini_epochs: 6
   critic_coef: 4
+  #critic_coef: 2
   clip_value: True
   bounds_loss_coef: 0.0001
-  max_agent_steps: 60000000   #30m
+  max_agent_steps: 90000000   #30m
   test_num_episodes: 100
   max_test_steps: 10000
   img_dim: [112, 112]

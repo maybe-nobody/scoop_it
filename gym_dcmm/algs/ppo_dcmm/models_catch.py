@@ -2,9 +2,13 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+'''
+神经网络：
+MLP:多层感知机/全连接神经网络，特点是每层的神经元和前一层的神经元全连接，适合处理结构化数据。标准MLP的输入通常是一个一维向量
+CNN:卷积神经网络，适合处理图片
+'''
 
-
-class MLP(nn.Module):
+class MLP(nn.Module):#定义了一个神经网络，但是没有定义输出层，现在最后一层是64维的。actor和critic两个都要用
     def __init__(self, units, input_size):
         super(MLP, self).__init__()
         layers = []
@@ -30,7 +34,13 @@ class MLP(nn.Module):
 class ActorCritic(nn.Module):
     def __init__(self, kwargs):
         nn.Module.__init__(self)
-        separate_value_mlp = kwargs.pop('separate_value_mlp')
+        separate_value_mlp = kwargs.pop('separate_value_mlp')#kwrgs是一个变量名，接受从外面传进来的字典
+        # net_config = {
+        #     'actor_units': self.network_config.mlp.units,隐藏层维度
+        #     'actions_num': self.actions_num,动作空间维度
+        #     'input_shape': self.obs_shape,观察维度
+        #     'separate_value_mlp': self.network_config.get('separate_value_mlp', True),critic/value网络是否使用单独的MLP
+        # }
         self.separate_value_mlp = separate_value_mlp
 
         actions_num = kwargs.pop('actions_num')
@@ -46,11 +56,12 @@ class ActorCritic(nn.Module):
         #self.actor_mlp_c = MLP(units=self.units, input_size=mlp_input_shape-2)减去的是底座？
         # if self.separate_value_mlp:
         self.value_mlp = MLP(units=self.units, input_size=mlp_input_shape)
-        self.value = torch.nn.Linear(out_size, 1)
-        self.mu_t = torch.nn.Linear(out_size, actions_num-2)
+        self.value = torch.nn.Linear(out_size, 1)#定义critic网络
+        self.mu_t = torch.nn.Linear(out_size, actions_num-2)#nn.Linear包含nn.Parameter这个功能
         self.mu_c = torch.nn.Linear(out_size, actions_num-7)##################################################原来是-6
         self.sigma_t = nn.Parameter(
-            torch.zeros(actions_num-2, requires_grad=True, dtype=torch.float32), requires_grad=True)
+            torch.zeros(actions_num-2, requires_grad=True, dtype=torch.float32), requires_grad=True)#定义actor输出动作分布的标准差分布
+        #tensor不会自己更新自己，pytorch提供了计算梯度记录计算图，优化器更新参数的功能，里面这个torch可以计算梯度，但是不能自己更新自己
         self.sigma_c = nn.Parameter(
             torch.zeros(actions_num-7, requires_grad=True, dtype=torch.float32), requires_grad=True)
 
@@ -64,12 +75,14 @@ class ActorCritic(nn.Module):
                 if getattr(m, 'bias', None) is not None:
                     torch.nn.init.zeros_(m.bias)
         nn.init.constant_(self.sigma_t, 0)
-        nn.init.constant_(self.sigma_c, 0)
+        nn.init.constant_(self.sigma_c, 0)#初始化数值
         # policy output layer with scale 0.01
         # value output layer with scale 1
-        torch.nn.init.orthogonal_(self.mu_t.weight, gain=0.01)
+        torch.nn.init.orthogonal_(self.mu_t.weight, gain=0.01)#把权重做正交初始化，缩放系数很小几乎等于0，缩放系数就是把初始化后中的矩阵系数乘以这个数值。先正交再乘增益
+        #会使信号在传播的过程中缩小，但是初始就是要设置很小的动作，不让动作太大。偏置已经在前面初始化为0了
         torch.nn.init.orthogonal_(self.mu_c.weight, gain=0.01)
         torch.nn.init.orthogonal_(self.value.weight, gain=1.0)
+        #nn.Linear(64, 8)  y = Wx + b W 是 8×64 的矩阵，b就是一个八维的。正交是不同向量之间内积为0，不管是行向量还是纵向量。正交矩阵的作用是信号传播不会突然放大或者缩小
 
     @torch.no_grad()
     def act(self, obs_dict):

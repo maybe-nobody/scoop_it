@@ -88,7 +88,7 @@
         <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
         <!-- 定义一个地面 -->
         <body name="base_link" pos="0 0 0.105" axisangle="1 0 0 0.00872664626">
-        <!-- overall mass = 113.434 kg body只给出一个“刚体原点”——也就是它自己的局部坐标系，加什么是geom说的算-->
+        <!-- overall mass = 113.434 kg body只给出一个“刚体原点”——也就是它自己的局部坐标系，加什么是geom说的算。这个是红杆-->
             <!-- camera -->
             <camera name="top" mode="fixed" pos="0.0 -0.125 1.3325" axisangle="1 0 0 1.2" fovy="58"/>
             <!-- <camera name="top" mode="fixed" pos="0.0 -0.2 1.35" axisangle="1 0 0 1.1781" fovy="57"/> -->
@@ -99,7 +99,7 @@
             <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="base_link" />
             <!-- 这些 geom 都属于当前这个 body（base_link），它们不是独立的刚体，而是这个 body 的组成部分。 -->
             <geom name="ranger_base" type="mesh" rgba="1 1 1 1" mesh="base_link" />
-            <geom pos="-0.0244824 -0.37251 0.279423" quat="0 0 0.710185 0.704015" type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="Box_Link" />
+            <!-- <geom pos="-0.0244824 -0.37251 0.279423" quat="0 0 0.710185 0.704015" type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="Box_Link" />
             <geom pos="-0.0244824 -0.37251 0.279423" quat="0 0 0.710185 0.704015" type="mesh" rgba="1 1 1 1" mesh="Box_Link" />
             <geom pos="-0.133 -0.214889 0.292686" quat="0.502177 0.497814 0.497814 -0.502177" type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="l1_Link" />
             <geom pos="-0.133 -0.214889 0.292686" quat="0.502177 0.497814 0.497814 -0.502177" type="mesh" rgba="1 1 1 1" mesh="l1_Link" />
@@ -121,13 +121,13 @@
             <geom pos="0.1575 0.1699 0.266828" quat="0.502177 0.497814 -0.497814 0.502177" type="mesh" contype="0" conaffinity="0" group="1" rgba="0.792157 0.819608 0.933333 1" mesh="a4_Link" />
             <geom pos="0.1575 0.1699 0.266828" quat="0.502177 0.497814 -0.497814 0.502177" type="mesh" rgba="0.792157 0.819608 0.933333 1" mesh="a4_Link" />
             <geom pos="0.1575 0.0650999 0.267742" quat="0.502177 0.497814 -0.497814 0.502177" type="mesh" contype="0" conaffinity="0" group="1" rgba="0.792157 0.819608 0.933333 1" mesh="a5_Link" />
-            <geom pos="0.1575 0.0650999 0.267742" quat="0.502177 0.497814 -0.497814 0.502177" type="mesh" rgba="0.792157 0.819608 0.933333 1" mesh="a5_Link" />
+            <geom pos="0.1575 0.0650999 0.267742" quat="0.502177 0.497814 -0.497814 0.502177" type="mesh" rgba="0.792157 0.819608 0.933333 1" mesh="a5_Link" /> -->
             <geom pos="0 0.118467 0.297778" quat="0.706818 -0.0030841 0.00308655 0.707382" type="mesh" contype="0" conaffinity="0" group="1" mesh="base" />
             <geom pos="0 0.118467 0.297778" quat="0.706818 -0.0030841 0.00308655 0.707382" type="mesh" mesh="base" />
-            <geom pos="-0.113 0.237202 0.243739" quat="0.502177 0.497814 -0.502177 -0.497814" type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="l6_Link" />
+            <!-- <geom pos="-0.113 0.237202 0.243739" quat="0.502177 0.497814 -0.502177 -0.497814" type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="l6_Link" />
             <geom pos="-0.113 0.237202 0.243739" quat="0.502177 0.497814 -0.502177 -0.497814" type="mesh" rgba="1 1 1 1" mesh="l6_Link" />
             <geom pos="0.113 0.237202 0.243739" quat="0.502177 0.497814 -0.502177 -0.497814" type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="l7_Link" />
-            <geom pos="0.113 0.237202 0.243739" quat="0.502177 0.497814 -0.502177 -0.497814" type="mesh" rgba="1 1 1 1" mesh="l7_Link" />
+            <geom pos="0.113 0.237202 0.243739" quat="0.502177 0.497814 -0.502177 -0.497814" type="mesh" rgba="1 1 1 1" mesh="l7_Link" /> -->
             <body name="arm_base" pos="0 0.118467 0.297778" quat="1 0.0 0.0 0.0" >
                 <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="Arm_base_Link" />
                 <geom type="mesh" rgba="1 1 1 1" mesh="Arm_base_Link" />
@@ -189,7 +189,7 @@
                 <inertial
                     pos="-3.5637e-05 -0.0014858 0.06674"
                     quat="1 0 0 0"
-                    mass="5.40929"
+                    mass="1.391"
                     diaginertia="0.030861 0.048311 0.029888" />
                 <joint name="arm_joint1"
                        type="hinge"
@@ -211,7 +211,7 @@
                     <inertial
                         pos="0.17311 0.018051 0.00018529"
                         quat="1 0 0 0"
-                        mass="3.35351"
+                        mass="1.3"
                         diaginertia="0.024494 0.15823 0.15532" />
                     <joint name="arm_joint2"
                            type="hinge"
@@ -233,7 +233,7 @@
                         <inertial
                             pos="0.043399 0.054752 0.00028446"
                             quat="1 0 0 0"
-                            mass="3.21174"
+                            mass="0.818"
                             diaginertia="0.081898 0.018731 0.083755" />
                         <joint name="arm_joint3"
                                type="hinge"
@@ -255,7 +255,7 @@
                             <inertial
                                 pos="-0.00135291345380234 -0.0049980799944554 0.234371357724064"
                                 quat="1 0 0 0"
-                                mass="3.0599040156102227"
+                                mass="0.816"
                                 diaginertia="6.61796983160363e-03 7.05845635270195e-03 2.61984540478227e-03" />
                             <joint name="arm_joint4"
                                    type="hinge"
@@ -277,7 +277,7 @@
                                 <inertial
                                     pos="6.85116779968742e-05 -0.0556274007824661 0.00388287915603674"
                                     quat="1 0 0 0"
-                                    mass="3.142243012088433"
+                                    mass="0.801"
                                     diaginertia="7.77689196142754e-03 6.35108922113425e-03 7.59377753113413e-03" />
                                 <joint name="arm_joint5"
                                        type="hinge"
@@ -299,7 +299,7 @@
                                     <inertial
                                         pos="1.40221168010157e-13 -1.50601753290402e-13 -0.0377661077969969"
                                         quat="1 0 0 0"
-                                        mass="3.182741457460028"
+                                        mass="0.465"
                                         diaginertia="0.0117279908572708 0.0115165704648131 7.42042523797467e-03" />
                                     <joint name="arm_joint6"
                                            type="hinge"
@@ -434,7 +434,7 @@
             <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="base_link" />
             <!-- 这些 geom 都属于当前这个 body（base_link），它们不是独立的刚体，而是这个 body 的组成部分。 -->
             <geom name="ranger_base_copy" type="mesh" rgba="1 1 1 1" mesh="base_link"/>
-            <geom pos="-0.0244824 -0.37251 0.279423" quat="0 0 0.710185 0.704015" type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="Box_Link" />
+            <!-- <geom pos="-0.0244824 -0.37251 0.279423" quat="0 0 0.710185 0.704015" type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="Box_Link" />
             <geom pos="-0.0244824 -0.37251 0.279423" quat="0 0 0.710185 0.704015" type="mesh" rgba="1 1 1 1" mesh="Box_Link" />
             <geom pos="-0.133 -0.214889 0.292686" quat="0.502177 0.497814 0.497814 -0.502177" type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="l1_Link" />
             <geom pos="-0.133 -0.214889 0.292686" quat="0.502177 0.497814 0.497814 -0.502177" type="mesh" rgba="1 1 1 1" mesh="l1_Link" />
@@ -458,12 +458,12 @@
             <geom pos="0.1575 0.1699 0.266828" quat="0.502177 0.497814 -0.497814 0.502177" type="mesh" rgba="0.792157 0.819608 0.933333 1" mesh="a4_Link" />
             <geom pos="0.1575 0.0650999 0.267742" quat="0.502177 0.497814 -0.497814 0.502177" type="mesh" contype="0" conaffinity="0" group="1" rgba="0.792157 0.819608 0.933333 1" mesh="a5_Link" />
             <geom pos="0.1575 0.0650999 0.267742" quat="0.502177 0.497814 -0.497814 0.502177" type="mesh" rgba="0.792157 0.819608 0.933333 1" mesh="a5_Link" />
-            <geom pos="0 0.118467 0.297778" quat="0.706818 -0.0030841 0.00308655 0.707382" type="mesh" contype="0" conaffinity="0" group="1" mesh="base" />
+            <geom pos="0 0.118467 0.297778" quat="0.706818 -0.0030841 0.00308655 0.707382" type="mesh" contype="0" conaffinity="0" group="1" mesh="base" /> -->
             <geom pos="0 0.118467 0.297778" quat="0.706818 -0.0030841 0.00308655 0.707382" type="mesh" mesh="base" />
-            <geom pos="-0.113 0.237202 0.243739" quat="0.502177 0.497814 -0.502177 -0.497814" type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="l6_Link" />
+            <!-- <geom pos="-0.113 0.237202 0.243739" quat="0.502177 0.497814 -0.502177 -0.497814" type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="l6_Link" />
             <geom pos="-0.113 0.237202 0.243739" quat="0.502177 0.497814 -0.502177 -0.497814" type="mesh" rgba="1 1 1 1" mesh="l6_Link" />
             <geom pos="0.113 0.237202 0.243739" quat="0.502177 0.497814 -0.502177 -0.497814" type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="l7_Link" />
-            <geom pos="0.113 0.237202 0.243739" quat="0.502177 0.497814 -0.502177 -0.497814" type="mesh" rgba="1 1 1 1" mesh="l7_Link" />
+            <geom pos="0.113 0.237202 0.243739" quat="0.502177 0.497814 -0.502177 -0.497814" type="mesh" rgba="1 1 1 1" mesh="l7_Link" /> -->
             <body name="arm_base_copy" pos="0 0.118467 0.297778" axisangle="0 0 1 0" >
                 <geom type="mesh" contype="0" conaffinity="0" group="1" rgba="1 1 1 1" mesh="Arm_base_Link" />
                 <geom type="mesh" rgba="1 1 1 1" mesh="Arm_base_Link" />
@@ -525,7 +525,7 @@
                 <inertial
                     pos="-3.5637e-05 -0.0014858 0.06674"
                     quat="1 0 0 0"
-                    mass="5.40929"
+                    mass="1.391"
                     diaginertia="0.030861 0.048311 0.029888" />
                 <joint name="arm_joint1_copy"
                        type="hinge"
@@ -547,7 +547,7 @@
                     <inertial
                         pos="0.17311 0.018051 0.00018529"
                         quat="1 0 0 0"
-                        mass="3.35351"
+                        mass="1.3"
                         diaginertia="0.024494 0.15823 0.15532" />
                     <joint name="arm_joint2_copy"
                            type="hinge"
@@ -569,7 +569,7 @@
                         <inertial
                             pos="0.043399 0.054752 0.00028446"
                             quat="1 0 0 0"
-                            mass="3.21174"
+                            mass="0.818"
                             diaginertia="0.081898 0.018731 0.083755" />
                         <joint name="arm_joint3_copy"
                                type="hinge"
@@ -591,7 +591,7 @@
                             <inertial
                                 pos="-0.00135291345380234 -0.0049980799944554 0.234371357724064"
                                 quat="1 0 0 0"
-                                mass="3.0599040156102227"
+                                mass="0.816"
                                 diaginertia="6.61796983160363e-03 7.05845635270195e-03 2.61984540478227e-03" />
                             <joint name="arm_joint4_copy"
                                    type="hinge"
@@ -613,7 +613,7 @@
                                 <inertial
                                     pos="6.85116779968742e-05 -0.0556274007824661 0.00388287915603674"
                                     quat="1 0 0 0"
-                                    mass="3.142243012088433"
+                                    mass="0.801"
                                     diaginertia="7.77689196142754e-03 6.35108922113425e-03 7.59377753113413e-03" />
                                 <joint name="arm_joint5_copy"
                                        type="hinge"
@@ -635,7 +635,7 @@
                                     <inertial
                                         pos="1.40221168010157e-13 -1.50601753290402e-13 -0.0377661077969969"
                                         quat="1 0 0 0"
-                                        mass="3.182741457460028"
+                                        mass="0.465"
                                         diaginertia="0.0117279908572708 0.0115165704648131 7.42042523797467e-03" />
                                     <joint name="arm_joint6_copy"
                                            type="hinge"
@@ -797,7 +797,7 @@
             <geom name="edge_left"  type="box" size="0.005 0.15 0.04" pos="-0.15 0 0" rgba="0.8 0.8 0.8 1"/>
             <geom name="edge_right" type="box" size="0.005 0.15 0.04" pos="0.15 0 0" rgba="0.8 0.8 0.8 1"/>
 
-            <geom name="frame_bottom" type="box" size="0.15 0.15 0.005" pos="0 0 -0.015" rgba="0.5 0.5 0.5 0.5"/>
+            <geom name="frame_bottom" type="box" size="0.15 0.15 0.05" pos="0 0 -0.015" rgba="0.5 0.5 0.5 0.5"/>
 
             <site name="frame_corner_fl" pos="-0.15 0.15 0" size="0.005"/>
             <site name="frame_corner_fr" pos="0.15 0.15 0" size="0.005"/>
@@ -841,6 +841,14 @@
         <pair name = "floor_wheel_2_copy" geom1 = "floor" geom2 = "Wheel2_copy" friction = "1.1 1.1 0.005 0.0001 0.0001"/>
         <pair name = "floor_wheel_4_copy" geom1 = "floor" geom2 = "Wheel4_copy" friction = "1.1 1.1 0.005 0.0001 0.0001"/>
         <pair name = "floor_wheel_3_copy" geom1 = "floor" geom2 = "Wheel3_copy" friction = "1.1 1.1 0.005 0.0001 0.0001"/>
+        <!-- <pair name = "floor_wheel_1" geom1 = "floor" geom2 = "Wheel1" friction = "2 2 0.01 0.0002 0.0001"/>
+        <pair name = "floor_wheel_2" geom1 = "floor" geom2 = "Wheel2" friction = "2 2 0.01 0.0002 0.0001"/>
+        <pair name = "floor_wheel_4" geom1 = "floor" geom2 = "Wheel4" friction = "2 2 0.01 0.0002 0.0001"/>
+        <pair name = "floor_wheel_3" geom1 = "floor" geom2 = "Wheel3" friction = "2 2 0.01 0.0002 0.0001"/>
+        <pair name = "floor_wheel_1_copy" geom1 = "floor" geom2 = "Wheel1_copy" friction = "2 2 0.01 0.0002 0.0001"/>
+        <pair name = "floor_wheel_2_copy" geom1 = "floor" geom2 = "Wheel2_copy" friction = "2 2 0.01 0.0002 0.0001"/>
+        <pair name = "floor_wheel_4_copy" geom1 = "floor" geom2 = "Wheel4_copy" friction = "2 2 0.01 0.0002 0.0001"/>
+        <pair name = "floor_wheel_3_copy" geom1 = "floor" geom2 = "Wheel3_copy" friction = "2 2 0.01 0.0002 0.0001"/> -->
         <!-- pair是手动指定碰撞和；摩擦力，这里是让轮子和地面有摩擦力 -->
         <exclude name = "exclude_body_wheel_1" body1="base_link" body2="Wheel1_Link" />
         <exclude name = "exclude_body_wheel_2" body1="base_link" body2="Wheel2_Link" />
@@ -862,62 +870,62 @@
     </contact>
     <actuator>
         <!-- base actuators -->
-        <motor name="base_sfl" joint="steer_fl" ctrlrange="-7.5 7.5" />   
+        <motor name="base_sfl" joint="steer_fl" ctrlrange="-50 50" />   
         <!-- 0 -->
-        <motor name="base_sfr" joint="steer_fr" ctrlrange="-7.5 7.5" />
+        <motor name="base_sfr" joint="steer_fr" ctrlrange="-50 50" />
         <!-- 1 -->
-        <motor name="base_srl" joint="steer_rl" ctrlrange="-7.5 7.5" />
+        <motor name="base_srl" joint="steer_rl" ctrlrange="-50 50" />
         <!-- 2 -->
-        <motor name="base_srr" joint="steer_rr" ctrlrange="-7.5 7.5" />
+        <motor name="base_srr" joint="steer_rr" ctrlrange="-50 50" />
         <!-- 3 -->
-        <motor name="base_dfl" joint="drive_fl" ctrlrange="-40.19 40.19" />
+        <motor name="base_dfl" joint="drive_fl" ctrlrange="-100 100"/>
         <!-- 4 -->
-        <motor name="base_dfr" joint="drive_fr" ctrlrange="-40.19 40.19" />
+        <motor name="base_dfr" joint="drive_fr" ctrlrange="-100 100" />
         <!-- 5 -->
-        <motor name="base_drl" joint="drive_rl" ctrlrange="-40.19 40.19" />
+        <motor name="base_drl" joint="drive_rl" ctrlrange="-100 100" />
         <!-- 6 -->
-        <motor name="base_drr" joint="drive_rr" ctrlrange="-40.19 40.19" />
+        <motor name="base_drr" joint="drive_rr" ctrlrange="-100 100" />
         <!-- 7 -->
-        <motor name="base_sfl_copy" joint="steer_fl_copy" ctrlrange="-7.5 7.5" />
+        <motor name="base_sfl_copy" joint="steer_fl_copy" ctrlrange="-50 50" />
         <!-- 8 -->
-        <motor name="base_sfr_copy" joint="steer_fr_copy" ctrlrange="-7.5 7.5" />
+        <motor name="base_sfr_copy" joint="steer_fr_copy" ctrlrange="-50 50" />
         <!-- 9 -->
-        <motor name="base_srl_copy" joint="steer_rl_copy" ctrlrange="-7.5 7.5" />
+        <motor name="base_srl_copy" joint="steer_rl_copy" ctrlrange="-50 50" />
         <!-- 10 -->
-        <motor name="base_srr_copy" joint="steer_rr_copy" ctrlrange="-7.5 7.5" />
+        <motor name="base_srr_copy" joint="steer_rr_copy" ctrlrange="-50 50" />
         <!-- 11 -->
-        <motor name="base_dfl_copy" joint="drive_fl_copy" ctrlrange="-40.19 40.19" />
+        <motor name="base_dfl_copy" joint="drive_fl_copy" ctrlrange="-100 100" />
         <!-- 12 -->
-        <motor name="base_dfr_copy" joint="drive_fr_copy" ctrlrange="-40.19 40.19" />
+        <motor name="base_dfr_copy" joint="drive_fr_copy" ctrlrange="-100 100" />
         <!-- 13 -->
-        <motor name="base_drl_copy" joint="drive_rl_copy" ctrlrange="-40.19 40.19" />
+        <motor name="base_drl_copy" joint="drive_rl_copy" ctrlrange="-100 100" />
         <!-- 14 -->
-        <motor name="base_drr_copy" joint="drive_rr_copy" ctrlrange="-40.19 40.19" />
+        <motor name="base_drr_copy" joint="drive_rr_copy" ctrlrange="-100 100" />
         <!-- 15 -->
         <!-- xarm actuators -->
-        <motor name="arm_actuator_1" joint="arm_joint1" ctrlrange="-100 100" />
+        <motor name="arm_actuator_1" joint="arm_joint1" ctrlrange="-40 40" />
         <!-- 16 -->
-        <motor name="arm_actuator_2" joint="arm_joint2" ctrlrange="-100 100" />
+        <motor name="arm_actuator_2" joint="arm_joint2" ctrlrange="-40 40" />
         <!-- 17 -->
-        <motor name="arm_actuator_3" joint="arm_joint3" ctrlrange="-100 100" />
+        <motor name="arm_actuator_3" joint="arm_joint3" ctrlrange="-20 20" />
         <!-- 18 -->
-        <motor name="arm_actuator_4" joint="arm_joint4" ctrlrange="-100 100" />
+        <motor name="arm_actuator_4" joint="arm_joint4" ctrlrange="-7 7" />
         <!-- 19 -->
-        <motor name="arm_actuator_5" joint="arm_joint5" ctrlrange="-100 100" />
+        <motor name="arm_actuator_5" joint="arm_joint5" ctrlrange="-7 7" />
         <!-- 20 -->
-        <motor name="arm_actuator_6" joint="arm_joint6" ctrlrange="-100 100" />
+        <motor name="arm_actuator_6" joint="arm_joint6" ctrlrange="-7 7" />
         <!-- 21 -->
-        <motor name="arm_actuator_1_copy" joint="arm_joint1_copy" ctrlrange="-100 100" />
+        <motor name="arm_actuator_1_copy" joint="arm_joint1_copy" ctrlrange="-40 40" />
         <!-- 22 -->
-        <motor name="arm_actuator_2_copy" joint="arm_joint2_copy" ctrlrange="-100 100" />
+        <motor name="arm_actuator_2_copy" joint="arm_joint2_copy" ctrlrange="-40 40" />
         <!-- 23 -->
-        <motor name="arm_actuator_3_copy" joint="arm_joint3_copy" ctrlrange="-100 100" />
+        <motor name="arm_actuator_3_copy" joint="arm_joint3_copy" ctrlrange="-20 20" />
         <!-- 24 -->
-        <motor name="arm_actuator_4_copy" joint="arm_joint4_copy" ctrlrange="-100 100" />
+        <motor name="arm_actuator_4_copy" joint="arm_joint4_copy" ctrlrange="-7 7" />
         <!-- 25 -->
-        <motor name="arm_actuator_5_copy" joint="arm_joint5_copy" ctrlrange="-100 100" />
+        <motor name="arm_actuator_5_copy" joint="arm_joint5_copy" ctrlrange="-7 7" />
         <!-- 26 -->
-        <motor name="arm_actuator_6_copy" joint="arm_joint6_copy" ctrlrange="-100 100" />
+        <motor name="arm_actuator_6_copy" joint="arm_joint6_copy" ctrlrange="-7 7" />
         <!-- 27 -->
         <!-- <motor name="hand_actuator_0" joint="gripper1_axis" gear="5" ctrlrange = "-10 10" />
         <motor name="hand_actuator_1" joint="gripper2_axis" gear="5" ctrlrange = "-10 10" /> -->

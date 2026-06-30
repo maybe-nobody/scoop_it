@@ -31,7 +31,7 @@ class AverageScalarMeter(object):
         return self.mean
 
 
-class RunningMeanStd(nn.Module):
+class RunningMeanStd(nn.Module):#1. 统计 running_mean / running_var / count 2. 用统计出来的均值和方差，把输入归一化后输出
     def __init__(self, insize, epsilon=1e-05, per_channel=False, norm_only=False):
         super(RunningMeanStd, self).__init__()
         print('RunningMeanStd: ', insize)

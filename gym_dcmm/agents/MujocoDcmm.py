@@ -42,7 +42,49 @@ def xml_to_string(file_path):#把 XML 文件内容读取并转成字符串
 DEBUG_ARM = False
 DEBUG_BASE = False
 
+def make_level_rotation_keep_yaw(current_R):
+    """
+    构造一个“水平朝上”的目标旋转矩阵。
 
+    作用：
+    1. 目标 z 轴对齐世界 z 轴 [0, 0, 1]
+    2. 尽量保留当前末端的 yaw 方向
+    3. 去掉 roll / pitch 倾斜
+
+    current_R:
+        当前末端姿态旋转矩阵，shape=(3, 3)
+
+    return:
+        R_level:
+            水平朝上的目标旋转矩阵，shape=(3, 3)
+    """
+
+    target_z = np.array([0.0, 0.0, 1.0], dtype=np.float64)
+
+    # 当前末端 x 轴在世界坐标系下的方向
+    current_x = current_R[:, 0].copy()
+
+    # 把当前 x 轴投影到水平面，保留 yaw，去掉 z 分量
+    target_x = current_x.copy()
+    target_x[2] = 0.0
+
+    # 如果当前 x 轴几乎竖直，投影会接近 0，这时给一个默认 x 方向
+    if np.linalg.norm(target_x) < 1e-8:
+        target_x = np.array([1.0, 0.0, 0.0], dtype=np.float64)
+    else:
+        target_x = target_x / np.linalg.norm(target_x)
+
+    # 构造右手坐标系
+    target_y = np.cross(target_z, target_x)
+    target_y = target_y / (np.linalg.norm(target_y) + 1e-8)
+
+    # 重新正交化 target_x，防止数值误差
+    target_x = np.cross(target_y, target_z)
+    target_x = target_x / (np.linalg.norm(target_x) + 1e-8)
+
+    R_level = np.column_stack([target_x, target_y, target_z])
+
+    return R_level
 class MJ_DCMM(object):
     """
     Class of the DexCatch with Mobile Manipulation (DCMM)一个机器人任务环境
@@ -312,9 +354,9 @@ class MJ_DCMM(object):
         mv_steer = self.steer_pid.update(self.steer_ang, current_steer_pos, self.data.time)#PID 控制器根据目标角度和当前角度，输出转向控制信号。
         mv_drive = self.drive_pid.update(self.drive_vel, current_drive_vel, self.data.time)#PID 控制器根据目标速度和当前速度，输出驱动控制信号。
         if np.all(current_drive_vel > 0.0) and np.all(current_drive_vel < self.drive_vel):
-            mv_drive = np.clip(mv_drive, 0, self.drive_ctrlrange[1] / 10.0)
+            mv_drive = np.clip(mv_drive, 0, self.drive_ctrlrange[1] / 2.0)
         if np.all(current_drive_vel < 0.0) and np.all(current_drive_vel > self.drive_vel):
-            mv_drive = np.clip(mv_drive, self.drive_ctrlrange[0] / 10.0, 0)
+            mv_drive = np.clip(mv_drive, self.drive_ctrlrange[0] / 2.0, 0)
         #防止轮子从正转突然变反转（或反之）时控制信号过大。
         mv_steer = np.clip(mv_steer, self.steer_ctrlrange[0], self.steer_ctrlrange[1])
         #把转向控制信号限制在允许范围内（防止打角过大）。
@@ -339,72 +381,170 @@ class MJ_DCMM(object):
         mv_steer = self.steer_pid_copy.update(self.steer_ang_copy, current_steer_pos, self.data.time)#PID 控制器根据目标角度和当前角度，输出转向控制信号。
         mv_drive = self.drive_pid_copy.update(self.drive_vel_copy, current_drive_vel, self.data.time)#PID 控制器根据目标速度和当前速度，输出驱动控制信号。
         if np.all(current_drive_vel > 0.0) and np.all(current_drive_vel < self.drive_vel_copy):
-            mv_drive = np.clip(mv_drive, 0, self.drive_ctrlrange[1] / 10.0)
+            mv_drive = np.clip(mv_drive, 0, self.drive_ctrlrange[1] / 2.0)
         if np.all(current_drive_vel < 0.0) and np.all(current_drive_vel > self.drive_vel_copy):
-            mv_drive = np.clip(mv_drive, self.drive_ctrlrange[0] / 10.0, 0)
+            mv_drive = np.clip(mv_drive, self.drive_ctrlrange[0] / 2.0, 0)
         #防止轮子从正转突然变反转（或反之）时控制信号过大。
         mv_steer = np.clip(mv_steer, self.steer_ctrlrange[0], self.steer_ctrlrange[1])
         #把转向控制信号限制在允许范围内（防止打角过大）。
         return mv_steer, mv_drive
 
-    def move_ee_pose(self, delta_pose):
+    # def move_ee_pose(self, delta_pose):
+    #     """
+    #     Move the end-effector to the target pose.
+    #     delta_pose[0:3]: delta x,y,z
+    #     delta_pose[3:6]: delta euler angles roll, pitch, yaw
+
+    #     Return:
+    #     - The target joint positions of the arm
+    #     """
+    #     self.current_ee_pos[:] = self.data_arm.body("arm_seg6").xpos[:]#机械臂末端相对于机械臂世界坐标系的位置
+    #     self.current_ee_quat[:] = self.data_arm.body("arm_seg6").xquat[:]#机械臂末端相对于机械臂世界坐标系的四元数
+
+    #     target_pos = self.current_ee_pos + delta_pose[0:3]
+
+    #     self.current_ee_quat = quat_wxyz_to_xyzw(self.current_ee_quat)##########################################后加的
+    #     r_delta = R.from_euler('zxy', delta_pose[3:6])#三个数是绕三个轴的旋转角
+    #     r_current = R.from_quat(self.current_ee_quat)
+    #     target_quat = (r_delta * r_current).as_quat()#四元数xyzw
+    #     result_QP = self.ik_arm_solve(target_pos, target_quat)
+    #     if DEBUG_ARM: print("result_QP: ", result_QP)
+    #     # Update the qpos of the arm with the IK solution
+    #     self.data_arm.qpos[0:6] = result_QP[0]
+    #     mujoco.mj_fwdPosition(self.model_arm, self.data_arm)
+        
+    #     # Compute the ee_length
+    #     relative_ee_pos = target_pos - self.data_arm.body("arm_base").xpos
+    #     ee_length = np.linalg.norm(relative_ee_pos)
+
+
+    #     return result_QP, ee_length
+    
+    # def move_ee_pose_copy(self, delta_pose):
+    #     """
+    #     Move the end-effector to the target pose.
+    #     delta_pose[0:3]: delta x,y,z
+    #     delta_pose[3:6]: delta euler angles roll, pitch, yaw
+    #     Return:
+    #     - The target joint positions of the arm
+    #     """
+    #     self.current_ee_pos_copy[:] = self.data_arm_copy.body("arm_seg6").xpos[:]#机械臂末端相对于机械臂世界坐标系的位置
+    #     self.current_ee_quat_copy[:] = self.data_arm_copy.body("arm_seg6").xquat[:]#机械臂末端相对于机械臂世界坐标系的四元数
+    #     target_pos = self.current_ee_pos_copy + delta_pose[0:3]
+    #     self.current_ee_quat_copy = quat_wxyz_to_xyzw(self.current_ee_quat_copy)##########################################后加的
+    #     r_delta = R.from_euler('zxy', delta_pose[3:6])
+    #     r_current = R.from_quat(self.current_ee_quat_copy)
+    #     target_quat = (r_delta * r_current).as_quat()#四元数xyzw
+    #     result_QP = self.ik_arm_solve_copy(target_pos, target_quat)
+    #     if DEBUG_ARM: print("result_QP: ", result_QP)
+    #     # Update the qpos of the arm with the IK solution
+    #     self.data_arm_copy.qpos[0:6] = result_QP[0]
+    #     mujoco.mj_fwdPosition(self.model_arm_copy, self.data_arm_copy)
+    #     # Compute the ee_length
+    #     relative_ee_pos = target_pos - self.data_arm_copy.body("arm_base").xpos
+    #     ee_length = np.linalg.norm(relative_ee_pos)
+
+
+    #     return result_QP, ee_length
+    def move_ee_pose(self, delta_pose, target_quat_wxyz=None, keep_level=False):
         """
         Move the end-effector to the target pose.
-        delta_pose[0:3]: delta x,y,z
-        delta_pose[3:6]: delta euler angles roll, pitch, yaw
 
-        Return:
-        - The target joint positions of the arm
+        delta_pose[0:3]:
+            delta x, y, z，仍然由 RL 控制末端位置。
+
+        delta_pose[3:6]:
+            姿态增量。如果 keep_level=True，则这里可以忽略。
+
+        target_quat_wxyz:
+            可选。如果你想固定某个目标四元数，可以传入 MuJoCo 格式 wxyz。
+
+        keep_level:
+            如果 True，则不直接固定四元数，而是构造一个“水平朝上”的目标姿态：
+            - z 轴对齐世界 z 轴
+            - yaw 尽量保持当前末端 yaw
+            - 去掉 roll/pitch 倾斜
         """
-        self.current_ee_pos[:] = self.data_arm.body("arm_seg6").xpos[:]#机械臂末端相对于机械臂世界坐标系的位置
-        self.current_ee_quat[:] = self.data_arm.body("arm_seg6").xquat[:]#机械臂末端相对于机械臂世界坐标系的四元数
 
+        # 当前末端位置和姿态，来自单独 arm model
+        self.current_ee_pos[:] = self.data_arm.body("arm_seg6").xpos[:]
+        self.current_ee_quat[:] = self.data_arm.body("arm_seg6").xquat[:]  # MuJoCo: wxyz
+
+        # 位置目标：仍然由 RL 的前三维 action 控制
         target_pos = self.current_ee_pos + delta_pose[0:3]
 
-        self.current_ee_quat = quat_wxyz_to_xyzw(self.current_ee_quat)##########################################后加的
-        r_delta = R.from_euler('zxy', delta_pose[3:6])#三个数是绕三个轴的旋转角
-        r_current = R.from_quat(self.current_ee_quat)
-        target_quat = (r_delta * r_current).as_quat()#四元数xyzw
+        # 当前姿态：MuJoCo wxyz -> SciPy xyzw
+        current_quat_xyzw = quat_wxyz_to_xyzw(self.current_ee_quat)
+        r_current = R.from_quat(current_quat_xyzw)
+
+        if keep_level:
+            # 构造“水平朝上，保留 yaw”的目标姿态
+            current_R = r_current.as_matrix()
+            target_R = make_level_rotation_keep_yaw(current_R)
+            target_quat = R.from_matrix(target_R).as_quat()  # SciPy: xyzw
+
+        elif target_quat_wxyz is not None:
+            # 如果外部传了固定目标四元数，使用它
+            target_quat = quat_wxyz_to_xyzw(target_quat_wxyz)  # SciPy: xyzw
+
+        else:
+            # 原来的逻辑：用 delta_pose[3:6] 在当前姿态上叠加旋转
+            r_delta = R.from_euler('zxy', delta_pose[3:6])
+            target_quat = (r_delta * r_current).as_quat()  # SciPy: xyzw
+
         result_QP = self.ik_arm_solve(target_pos, target_quat)
-        if DEBUG_ARM: print("result_QP: ", result_QP)
+
+        if DEBUG_ARM:
+            print("result_QP: ", result_QP)
+
         # Update the qpos of the arm with the IK solution
         self.data_arm.qpos[0:6] = result_QP[0]
         mujoco.mj_fwdPosition(self.model_arm, self.data_arm)
-        
+
         # Compute the ee_length
         relative_ee_pos = target_pos - self.data_arm.body("arm_base").xpos
         ee_length = np.linalg.norm(relative_ee_pos)
 
-
         return result_QP, ee_length
-    
-    def move_ee_pose_copy(self, delta_pose):
+    def move_ee_pose_copy(self, delta_pose, target_quat_wxyz=None, keep_level=False):
         """
-        Move the end-effector to the target pose.
-        delta_pose[0:3]: delta x,y,z
-        delta_pose[3:6]: delta euler angles roll, pitch, yaw
-        Return:
-        - The target joint positions of the arm
+        Move the copied end-effector to the target pose.
+
+        和 move_ee_pose() 逻辑一致，只是使用 copy arm。
         """
-        self.current_ee_pos_copy[:] = self.data_arm_copy.body("arm_seg6").xpos[:]#机械臂末端相对于机械臂世界坐标系的位置
-        self.current_ee_quat_copy[:] = self.data_arm_copy.body("arm_seg6").xquat[:]#机械臂末端相对于机械臂世界坐标系的四元数
+
+        self.current_ee_pos_copy[:] = self.data_arm_copy.body("arm_seg6").xpos[:]
+        self.current_ee_quat_copy[:] = self.data_arm_copy.body("arm_seg6").xquat[:]  # MuJoCo: wxyz
+
         target_pos = self.current_ee_pos_copy + delta_pose[0:3]
-        self.current_ee_quat_copy = quat_wxyz_to_xyzw(self.current_ee_quat_copy)##########################################后加的
-        r_delta = R.from_euler('zxy', delta_pose[3:6])
-        r_current = R.from_quat(self.current_ee_quat_copy)
-        target_quat = (r_delta * r_current).as_quat()#四元数xyzw
+
+        current_quat_xyzw = quat_wxyz_to_xyzw(self.current_ee_quat_copy)
+        r_current = R.from_quat(current_quat_xyzw)
+
+        if keep_level:
+            current_R = r_current.as_matrix()
+            target_R = make_level_rotation_keep_yaw(current_R)
+            target_quat = R.from_matrix(target_R).as_quat()  # SciPy: xyzw
+
+        elif target_quat_wxyz is not None:
+            target_quat = quat_wxyz_to_xyzw(target_quat_wxyz)
+
+        else:
+            r_delta = R.from_euler('zxy', delta_pose[3:6])
+            target_quat = (r_delta * r_current).as_quat()
+
         result_QP = self.ik_arm_solve_copy(target_pos, target_quat)
-        if DEBUG_ARM: print("result_QP: ", result_QP)
-        # Update the qpos of the arm with the IK solution
+
+        if DEBUG_ARM:
+            print("result_QP: ", result_QP)
+
         self.data_arm_copy.qpos[0:6] = result_QP[0]
         mujoco.mj_fwdPosition(self.model_arm_copy, self.data_arm_copy)
-        # Compute the ee_length
+
         relative_ee_pos = target_pos - self.data_arm_copy.body("arm_base").xpos
         ee_length = np.linalg.norm(relative_ee_pos)
 
-
         return result_QP, ee_length
-    
     def ik_arm_solve(self, target_pose, target_quate):
         """
         Solve the IK problem for the arm.

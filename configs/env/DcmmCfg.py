@@ -31,52 +31,94 @@ hand_joints = np.array([
 
 ## Define the reward weights
 reward_weights = {
-    "r_base_pos": 20,
-    "r_plate_pos": 80,
-    "r_ee_pos": 15.0,
-    "r_precision": 20.0,
-    "r_orient": 0.0,
-    "r_touch": {
-        'Tracking': 15.0,
-        'Catching': 15.0
-    },
-    "r_constraint": 2.0,
-    "r_stability": 20.0,
+    # norm_ctrl() 里面会用到这个
     "r_ctrl": {
-        'base': 0.5,
-        'arm': 1.0,
-        'hand': 0.2,
-        'base_copy': 0.5,
-        'arm_copy': 1.0,
-        'hand_copy': 0.2,
+        "base": 0.5,
+        "base_copy": 0.5,
+        "arm": 1.0,
+        "arm_copy": 1.0,
+        "hand": 0.2,
+        "hand_copy": 0.2,
     },
-    "r_collision": -10.0,
-    "r_away":0.2,
-    "r_far":7.0,
-    "r_axis_x": 0.3,
-    "r_axis_y": 0.3,
-    "r_axis_z": 0.2,
-    "r_axis_min": 0.4,
-    "axis_sigma": 0.06,
 
     "r_traj": {
-    "track_sigma": 0.20,
-    "target_sigma": 0.12,
-    "mid_sigma": 0.55,
-    "track_w": [6.0, 8.0, 2.0],
-    "target_w": [0.3, 4.0, 8.0],
-    "improve": 0.5,
-    "plate_level": 2.0,
-    "base_mid": 1.5,
-    "base_dist": 4.0,
-    "vel_sync": 0.2,
-    "bar_level": 1.0,
-    "ee_height": 0.5,
-    "ctrl": 0.03,
-    "ik_fail": 2.0,
-    "collision": 10.0,
-    "success": 15.0,
-},
+        # =========================================================
+        # 1. 最终目标点奖励
+        # =========================================================
+        # 远距离引导：target_error 约 1m 时也有信号
+        "target_far": 4.0,
+        "target_far_sigma": 1.0,
+
+        # 中距离引导：约 0.2~0.5m 时起作用
+        "target_mid": 4.0,
+        "target_mid_sigma": 0.35,
+
+        # 近距离精确奖励：接近 success threshold 时起作用
+        "target_precision": 8.0,
+        "target_precision_sigma": 0.10,
+
+        # 每一步 target_error 变小就奖励
+        "target_improve": 4.0,
+
+        # target_error 太大时扣分
+        "target_distance": 1.0,
+
+        # =========================================================
+        # 2. waypoint path 奖励
+        # =========================================================
+        # 只作为辅助，不能太大，否则不动也能拿奖励
+        "path_follow": 0.05,
+
+        # 真正鼓励沿路径往目标方向前进
+        "path_progress": 10.0,
+
+        # 后退惩罚
+        "path_backward": 1.0,
+
+        # 不前进惩罚
+        "no_progress": 0.5,
+
+        # =========================================================
+        # 3. 盘子 / 机械结构稳定
+        # =========================================================
+        "plate_level": 1.0,
+        "bar_level": 0.3,
+        "ee_height": 0.2,
+
+        # =========================================================
+        # 4. 双底盘奖励
+        # =========================================================
+        # 底盘中点靠近目标 xy
+        "base_mid": 2.0,
+        "mid_sigma": 1.0,
+
+        # 底盘距离范围奖励
+        "base_dist_min": 0.95,
+        "base_dist_max": 1.15,
+        "base_dist": 4.0,
+
+        # 两个底盘速度同步
+        "vel_sync": 0.5,
+
+        # =========================================================
+        # 5. 直接鼓励盘子朝目标方向移动
+        # =========================================================
+        "plate_vel_to_target": 1.0,
+
+        # =========================================================
+        # 6. 动作 / 失败 / 成功
+        # =========================================================
+        "ctrl": 0.03,
+        "ik_fail": 2.0,
+        "collision": 10.0,
+        "success": 15.0,
+
+        # =========================================================
+        # 7. 机械臂姿态正则
+        # =========================================================
+        "arm_posture": 0.15,
+        "arm_symmetry": 0.05,
+    },
 }
 
 ## Define the camera params for the MujocoRenderer.
@@ -120,8 +162,10 @@ k_arm = np.array([0.75, 1.25])
 ## Hand Joints
 k_hand = np.array([0.75, 1.25])
 ## Object Shape and Size
-object_shape = ["box", "cylinder", "sphere", "ellipsoid", "capsule"]
+#object_shape = ["box", "cylinder", "sphere", "ellipsoid", "capsule"]
 
+
+object_shape = ["box", "box", "box", "box", "box"]
 
 object_mesh = ["bottle_mesh", "bread_mesh", "bowl_mesh", "cup_mesh", "winnercup_mesh"]
 #object_mesh = ["bottle_mesh"]
@@ -129,7 +173,7 @@ object_size = {
     "sphere": np.array([[0.015, 0.020]]),#一个数组表示的是某个参数的上下限，球
     "capsule": np.array([[0.01, 0.015], [0.025, 0.04]]),#半径，半长度
     "cylinder": np.array([[0.01, 0.015], [0.02, 0.025]]),#圆柱，半径半长度
-    "box": np.array([[0.01, 0.015], [0.01, 0.015], [0.01, 0.015]]),#半长度
+    "box": np.array([[0.02, 0.04], [0.02, 0.04], [0.02, 0.04]]),#半长度
     "ellipsoid": np.array([[0.01, 0.015], [0.01, 0.015], [0.01, 0.015]]),
 }
 # object_size = {
@@ -141,7 +185,7 @@ object_size = {
 # }
 object_mass = np.array([0.035, 0.075])
 object_damping = np.array([5e-3, 2e-2])
-object_static = np.array([0.25, 0.75])
+object_static = np.array([0.25, 0.5])
 ## Observation Noise
 k_obs_base = 0.01
 k_obs_arm = 0.001
